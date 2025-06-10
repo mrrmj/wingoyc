@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wingo彩票分析助手</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+<body>
+    <!-- 加载屏幕 -->
+    <div class="loader-screen">
+        <div class="loader-content">
+            <div class="loader-logo">
+                <span class="material-icons-round">casino</span>
+            </div>
+            <div class="loader-text">Wingo专业分析</div>
+            <div class="loader-progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 应用主容器 -->
+    <div class="app-container" id="app">
+        <!-- 主页 -->
+        <div class="page active" id="home">
+            <!-- 头部区域 -->
+            <header class="page-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <div class="app-logo">
+                            <span class="material-icons-round">casino</span>
+                        </div>
+                        <div class="app-info">
+                            <h1>Wingo分析</h1>
+                            <p>专业预测系统</p>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <button class="header-btn notification-btn">
+                            <span class="material-icons-round">notifications</span>
+                            <span class="badge"></span>
+                        </button>
+                        <button class="header-btn settings-btn">
+                            <span class="material-icons-round">settings</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-content">
+                <!-- 实时开奖卡片 -->
+                <div class="live-card">
+                    <div class="data-status api" id="dataStatus">
+                        <div class="data-status-dot"></div>
+                        <span>实时数据</span>
+                    </div>
+                    
+                    <div class="live-header">
+                        <div class="live-title">
+                            <h2>实时开奖</h2>
+                            <div class="live-indicator">
+                                <span class="live-dot"></span>
+                                <span>LIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="live-content">
+                        <div class="countdown-section">
+                            <div class="countdown-timer">
+                                <div class="timer-display">02:45</div>
+                                <div class="timer-label">下期开奖倒计时</div>
+                            </div>
+                            <div class="period-info">
+                                <div class="period-label">当前期数</div>
+                                <div class="period-number">第20240001期</div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-section">
+                            <div class="result-label">上期开奖结果</div>
+                            <div class="result-display">
+                                <div class="result-ball red">8</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 功能网格 -->
+                <div class="features-section">
+                    <div class="section-header">
+                        <h2>功能分析</h2>
+                        <button class="view-all-btn">查看全部</button>
+                    </div>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card main-feature" data-page="predict">
+                            <div class="feature-icon primary">
+                                <span class="material-icons-round">auto_awesome</span>
+                            </div>
+                            <div class="feature-content">
+                                <h3>智能预测</h3>
+                                <p>AI数据分析，精准预测</p>
+                            </div>
+                            <div class="feature-arrow">
+                                <span class="material-icons-round">arrow_forward_ios</span>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card" data-page="history">
+                            <div class="feature-icon purple">
+                                <span class="material-icons-round">history</span>
+                            </div>
+                            <div class="feature-content">
+                                <h3>历史记录</h3>
+                                <p>开奖数据查询</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card" data-page="trend">
+                            <div class="feature-icon green">
+                                <span class="material-icons-round">trending_up</span>
+                            </div>
+                            <div class="feature-content">
+                                <h3>走势分析</h3>
+                                <p>号码趋势图表</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card" data-page="pattern">
+                            <div class="feature-icon orange">
+                                <span class="material-icons-round">grid_view</span>
+                            </div>
+                            <div class="feature-content">
+                                <h3>路单分析</h3>
+                                <p>大小单双规律</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card" data-page="strategy">
+                            <div class="feature-icon blue">
+                                <span class="material-icons-round">military_tech</span>
+                            </div>
+                            <div class="feature-content">
+                                <h3>投注策略</h3>
+                                <p>智能投注方案</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据统计 -->
+                <div class="stats-section">
+                    <div class="section-header">
+                        <h2>数据统计</h2>
+                        <button class="refresh-stats-btn" id="refreshStatsBtn">
+                            <span class="material-icons-round">refresh</span>
+                        </button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" data-stat="big">
+                            <div class="stat-value" id="bigPercent">48.5%</div>
+                            <div class="stat-label">大号概率</div>
+                        </div>
+                        <div class="stat-card" data-stat="small">
+                            <div class="stat-value" id="smallPercent">51.5%</div>
+                            <div class="stat-label">小号概率</div>
+                        </div>
+                        <div class="stat-card" data-stat="odd">
+                            <div class="stat-value" id="oddPercent">49.8%</div>
+                            <div class="stat-label">单号概率</div>
+                        </div>
+                        <div class="stat-card" data-stat="even">
+                            <div class="stat-value" id="evenPercent">50.2%</div>
+                            <div class="stat-label">双号概率</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 热门号码 -->
+                <div class="hot-numbers-section">
+                    <div class="section-header">
+                        <h2>热门号码</h2>
+                        <button class="view-all-btn" data-page="trend">更多</button>
+                    </div>
+                    
+                    <div class="hot-numbers-list">
+                        <!-- 动态生成内容 -->
+                    </div>
+                </div>
+
+                <!-- 最近开奖 -->
+                <div class="recent-history-section">
+                    <div class="section-header">
+                        <h2>最近开奖</h2>
+                        <div class="section-actions">
+                            <button class="filter-history-btn" id="filterHistoryBtn">
+                                <span class="material-icons-round">filter_list</span>
+                            </button>
+                            <button class="view-all-btn" data-page="history">全部</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 历史记录过滤器 -->
+                    <div class="history-filters" id="historyFilters">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">全部</button>
+                            <button class="filter-tab" data-filter="big">大号</button>
+                            <button class="filter-tab" data-filter="small">小号</button>
+                            <button class="filter-tab" data-filter="odd">单号</button>
+                            <button class="filter-tab" data-filter="even">双号</button>
+                        </div>
+                        <div class="filter-colors">
+                            <button class="color-filter" data-color="all">全部</button>
+                            <button class="color-filter red" data-color="red">红</button>
+                            <button class="color-filter green" data-color="green">绿</button>
+                            <button class="color-filter purple" data-color="purple">紫</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 历史统计卡片 -->
+                    <div class="history-stats-cards">
+                        <div class="history-stat-card">
+                            <div class="stat-icon">
+                                <span class="material-icons-round">trending_up</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="currentStreak">3连大</div>
+                                <div class="stat-label">当前连号</div>
+                            </div>
+                        </div>
+                        <div class="history-stat-card">
+                            <div class="stat-icon">
+                                <span class="material-icons-round">star</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="hotestNumber">7</div>
+                                <div class="stat-label">最热号码</div>
+                            </div>
+                        </div>
+                        <div class="history-stat-card">
+                            <div class="stat-icon">
+                                <span class="material-icons-round">ac_unit</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="coldestNumber">2</div>
+                                <div class="stat-label">最冷号码</div>
+                            </div>
+                        </div>
+                        <div class="history-stat-card">
+                            <div class="stat-icon">
+                                <span class="material-icons-round">access_time</span>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="lastUpdate">刚刚</div>
+                                <div class="stat-label">最后更新</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 历史记录列表 -->
+                    <div class="recent-history-list" id="recentHistoryList">
+                        <!-- 动态生成内容 -->
+                    </div>
+                    
+                    <!-- 加载更多按钮 -->
+                    <div class="load-more-section">
+                        <button class="load-more-btn" id="loadMoreHistory">
+                            <span class="material-icons-round">expand_more</span>
+                            查看更多历史记录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 预测页面 -->
+        <div class="page" id="predict">
+            <header class="page-header">
+                <div class="header-content">
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
+                    </button>
+                    <h1>智能预测</h1>
+                    <button class="header-btn">
+                        <span class="material-icons-round">tune</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <!-- 预测卡片 -->
+                <div class="prediction-card">
+                    <div class="prediction-header">
+                        <div class="prediction-badge">AI预测</div>
+                        <div class="countdown-info">
+                            <span class="material-icons-round">timer</span>
+                            <span class="countdown-text">02:45</span>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-content">
+                        <div class="numbers-section">
+                            <div class="section-title">
+                                <h3>号码预测</h3>
+                                <div class="confidence-level">置信度 84%</div>
+                            </div>
+                            
+                            <div class="numbers-grid">
+                                <div class="number-item primary">
+                                    <div class="number-value">7</div>
+                                    <div class="number-probability">89%</div>
+                                </div>
+                                <div class="number-item">
+                                    <div class="number-value">3</div>
+                                    <div class="number-probability">76%</div>
+                                </div>
+                                <div class="number-item">
+                                    <div class="number-value">9</div>
+                                    <div class="number-probability">68%</div>
+                                </div>
+                                <div class="number-item">
+                                    <div class="number-value">5</div>
+                                    <div class="number-probability">62%</div>
+                                </div>
+                                <div class="number-item">
+                                    <div class="number-value">0</div>
+                                    <div class="number-probability">57%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="patterns-section">
+                            <div class="pattern-row">
+                                <div class="pattern-label">大小</div>
+                                <div class="pattern-options">
+                                    <span class="pattern-chip active">大</span>
+                                    <span class="pattern-chip">小</span>
+                                </div>
+                                <div class="pattern-probability">73%</div>
+                            </div>
+                            
+                            <div class="pattern-row">
+                                <div class="pattern-label">单双</div>
+                                <div class="pattern-options">
+                                    <span class="pattern-chip active">单</span>
+                                    <span class="pattern-chip">双</span>
+                                </div>
+                                <div class="pattern-probability">68%</div>
+                            </div>
+                            
+                            <div class="pattern-row">
+                                <div class="pattern-label">颜色</div>
+                                <div class="pattern-options">
+                                    <span class="pattern-chip">红</span>
+                                    <span class="pattern-chip active">绿</span>
+                                    <span class="pattern-chip">紫</span>
+                                </div>
+                                <div class="pattern-probability">64%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-actions">
+                        <button class="action-btn secondary">
+                            <span class="material-icons-round">insights</span>
+                            详细分析
+                        </button>
+                        <button class="action-btn primary">
+                            <span class="material-icons-round">refresh</span>
+                            刷新预测
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 预测参数 -->
+                <div class="parameters-card">
+                    <div class="card-header">
+                        <h3>预测参数</h3>
+                        <button class="reset-btn">重置</button>
+                    </div>
+                    
+                    <div class="parameters-content">
+                        <div class="parameter-item">
+                            <div class="parameter-label">
+                                <span>置信度</span>
+                                <span class="parameter-value">0.8</span>
+                            </div>
+                            <input type="range" class="parameter-slider" min="0.5" max="1" step="0.1" value="0.8">
+                        </div>
+                        
+                        <div class="parameter-item">
+                            <div class="parameter-label">
+                                <span>预测期数</span>
+                                <span class="parameter-value">30</span>
+                            </div>
+                            <input type="range" class="parameter-slider" min="10" max="100" value="30">
+                        </div>
+                        
+                        <div class="parameter-item">
+                            <div class="parameter-label">
+                                <span>形态类型</span>
+                            </div>
+                            <select class="parameter-select">
+                                <option value="normal">常规形态</option>
+                                <option value="special">特殊形态</option>
+                                <option value="repeated">重复形态</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 预测历史 -->
+                <div class="history-card">
+                    <div class="card-header">
+                        <h3>预测历史</h3>
+                        <button class="clear-history-btn">清空</button>
+                    </div>
+                    
+                    <div class="history-list">
+                        <!-- 动态生成内容 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 其他页面占位符 -->
+        <div class="page" id="history">
+            <header class="page-header">
+                <div class="header-content">
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
+                    </button>
+                    <h1>历史记录</h1>
+                    <button class="header-btn">
+                        <span class="material-icons-round">calendar_today</span>
+                    </button>
+                </div>
+            </header>
+            <div class="page-content">
+                <div class="placeholder-content">
+                    <span class="material-icons-round">history</span>
+                    <h3>历史记录</h3>
+                    <p>查看开奖历史数据</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="trend">
+            <header class="page-header">
+                <div class="header-content">
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
+                    </button>
+                    <h1>走势分析</h1>
+                    <button class="header-btn filter-btn">
+                        <span class="material-icons-round">filter_list</span>
+                    </button>
+                </div>
+            </header>
+            <div class="page-content">
+                <!-- 图表类型切换 -->
+                <div class="chart-tabs">
+                    <div class="tab-item active" data-chart="number">号码走势</div>
+                    <div class="tab-item" data-chart="size">大小走势</div>
+                    <div class="tab-item" data-chart="parity">单双走势</div>
+                    <div class="tab-item" data-chart="color">颜色走势</div>
+                </div>
+
+                <!-- 走势图表容器 -->
+                <div class="trend-chart-container">
+                    <!-- 号码走势图 -->
+                    <div class="trend-chart active" id="number-chart">
+                        <div class="chart-header">
+                            <h3>号码走势图</h3>
+                            <div class="chart-controls">
+                                <select class="period-select">
+                                    <option value="20">近20期</option>
+                                    <option value="50" selected>近50期</option>
+                                    <option value="100">近100期</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="number-trend-grid">
+                            <!-- 动态生成内容 -->
+                        </div>
+                        <div class="trend-legend">
+                            <div class="legend-item">
+                                <span class="legend-dot recent"></span>
+                                <span>最近5期</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot hot"></span>
+                                <span>热号</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot cold"></span>
+                                <span>冷号</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 大小走势图 -->
+                    <div class="trend-chart" id="size-chart">
+                        <div class="chart-header">
+                            <h3>大小走势图</h3>
+                            <div class="chart-info">
+                                <span class="info-text">大: 5-9, 小: 0-4</span>
+                            </div>
+                        </div>
+                        <div class="pattern-trend-container">
+                            <div class="trend-line" id="size-trend-line">
+                                <!-- 动态生成内容 -->
+                            </div>
+                        </div>
+                        <div class="pattern-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">大号出现率</span>
+                                <span class="stat-value" id="big-rate">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">小号出现率</span>
+                                <span class="stat-value" id="small-rate">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">当前连续</span>
+                                <span class="stat-value" id="size-streak">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 单双走势图 -->
+                    <div class="trend-chart" id="parity-chart">
+                        <div class="chart-header">
+                            <h3>单双走势图</h3>
+                            <div class="chart-info">
+                                <span class="info-text">单: 1,3,5,7,9, 双: 0,2,4,6,8</span>
+                            </div>
+                        </div>
+                        <div class="pattern-trend-container">
+                            <div class="trend-line" id="parity-trend-line">
+                                <!-- 动态生成内容 -->
+                            </div>
+                        </div>
+                        <div class="pattern-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">单号出现率</span>
+                                <span class="stat-value" id="odd-rate">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">双号出现率</span>
+                                <span class="stat-value" id="even-rate">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">当前连续</span>
+                                <span class="stat-value" id="parity-streak">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 颜色走势图 -->
+                    <div class="trend-chart" id="color-chart">
+                        <div class="chart-header">
+                            <h3>颜色走势图</h3>
+                            <div class="chart-info">
+                                <span class="info-text">红: 1,3,7,9, 绿: 2,4,6,8, 紫: 0,5</span>
+                            </div>
+                        </div>
+                        <div class="color-trend-container">
+                            <div class="color-trend-grid">
+                                <!-- 动态生成内容 -->
+                            </div>
+                        </div>
+                        <div class="color-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">红色出现率</span>
+                                <span class="stat-value" id="red-rate">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">绿色出现率</span>
+                                <span class="stat-value" id="green-rate">0%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">紫色出现率</span>
+                                <span class="stat-value" id="purple-rate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 走势分析卡片 -->
+                <div class="trend-analysis-card">
+                    <div class="card-header">
+                        <h3>趋势分析</h3>
+                        <button class="analysis-refresh-btn">
+                            <span class="material-icons-round">refresh</span>
+                        </button>
+                    </div>
+                    <div class="analysis-content">
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <span class="material-icons-round">trending_up</span>
+                            </div>
+                            <div class="analysis-text">
+                                <div class="analysis-title">热号预警</div>
+                                <div class="analysis-desc" id="hot-analysis">分析热号趋势...</div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <span class="material-icons-round">trending_down</span>
+                            </div>
+                            <div class="analysis-text">
+                                <div class="analysis-title">冷号分析</div>
+                                <div class="analysis-desc" id="cold-analysis">分析冷号趋势...</div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <span class="material-icons-round">insights</span>
+                            </div>
+                            <div class="analysis-text">
+                                <div class="analysis-title">形态预测</div>
+                                <div class="analysis-desc" id="pattern-analysis">分析当前形态...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 遗漏数据 -->
+                <div class="missing-data-card">
+                    <div class="card-header">
+                        <h3>遗漏数据</h3>
+                        <div class="missing-tabs">
+                            <span class="missing-tab active" data-type="number">号码</span>
+                            <span class="missing-tab" data-type="pattern">形态</span>
+                        </div>
+                    </div>
+                    <div class="missing-content">
+                        <div class="missing-grid" id="number-missing">
+                            <!-- 动态生成内容 -->
+                        </div>
+                        <div class="missing-grid hidden" id="pattern-missing">
+                            <!-- 动态生成内容 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="pattern">
+            <header class="page-header">
+                <div class="header-content">
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
+                    </button>
+                    <h1>路单分析</h1>
+                    <button class="header-btn pattern-filter-btn">
+                        <span class="material-icons-round">filter_list</span>
+                    </button>
+                </div>
+            </header>
+            <div class="page-content">
+                <!-- 路单类型切换 -->
+                <div class="pattern-tabs">
+                    <div class="pattern-tab active" data-pattern="size">大小路</div>
+                    <div class="pattern-tab" data-pattern="parity">单双路</div>
+                    <div class="pattern-tab" data-pattern="color">颜色路</div>
+                    <div class="pattern-tab" data-pattern="comprehensive">综合路</div>
+                </div>
+
+                <!-- 路单图表容器 -->
+                <div class="pattern-chart-container">
+                    <!-- 大小路单 -->
+                    <div class="pattern-chart active" id="size-pattern">
+                        <div class="pattern-header">
+                            <h3>大小路单</h3>
+                            <div class="pattern-info">
+                                <span class="info-badge">大: 5-9</span>
+                                <span class="info-badge">小: 0-4</span>
+                            </div>
+                        </div>
+                        <div class="pattern-road-container">
+                            <div class="road-grid" id="size-road-grid">
+                                <!-- 动态生成路单 -->
+                            </div>
+                        </div>
+                        <div class="pattern-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">大路连</span>
+                                <span class="summary-value" id="big-streak">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">小路连</span>
+                                <span class="summary-value" id="small-streak">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">跳路次数</span>
+                                <span class="summary-value" id="size-jumps">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 单双路单 -->
+                    <div class="pattern-chart" id="parity-pattern">
+                        <div class="pattern-header">
+                            <h3>单双路单</h3>
+                            <div class="pattern-info">
+                                <span class="info-badge">单: 1,3,5,7,9</span>
+                                <span class="info-badge">双: 0,2,4,6,8</span>
+                            </div>
+                        </div>
+                        <div class="pattern-road-container">
+                            <div class="road-grid" id="parity-road-grid">
+                                <!-- 动态生成路单 -->
+                            </div>
+                        </div>
+                        <div class="pattern-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">单路连</span>
+                                <span class="summary-value" id="odd-streak">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">双路连</span>
+                                <span class="summary-value" id="even-streak">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">跳路次数</span>
+                                <span class="summary-value" id="parity-jumps">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 颜色路单 -->
+                    <div class="pattern-chart" id="color-pattern">
+                        <div class="pattern-header">
+                            <h3>颜色路单</h3>
+                            <div class="pattern-info">
+                                <span class="info-badge red">红: 1,3,7,9</span>
+                                <span class="info-badge green">绿: 2,4,6,8</span>
+                                <span class="info-badge purple">紫: 0,5</span>
+                            </div>
+                        </div>
+                        <div class="pattern-road-container">
+                            <div class="road-grid color-road" id="color-road-grid">
+                                <!-- 动态生成路单 -->
+                            </div>
+                        </div>
+                        <div class="pattern-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">红路连</span>
+                                <span class="summary-value" id="red-streak">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">绿路连</span>
+                                <span class="summary-value" id="green-streak">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">紫路连</span>
+                                <span class="summary-value" id="purple-streak">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 综合路单 -->
+                    <div class="pattern-chart" id="comprehensive-pattern">
+                        <div class="pattern-header">
+                            <h3>综合路单分析</h3>
+                            <div class="pattern-controls">
+                                <select class="road-period-select">
+                                    <option value="30">近30期</option>
+                                    <option value="50" selected>近50期</option>
+                                    <option value="100">近100期</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="comprehensive-grid">
+                            <div class="mini-road">
+                                <h4>大小路</h4>
+                                <div class="mini-road-display" id="mini-size-road"></div>
+                            </div>
+                            <div class="mini-road">
+                                <h4>单双路</h4>
+                                <div class="mini-road-display" id="mini-parity-road"></div>
+                            </div>
+                            <div class="mini-road">
+                                <h4>颜色路</h4>
+                                <div class="mini-road-display" id="mini-color-road"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 路单分析卡片 -->
+                <div class="pattern-analysis-card">
+                    <div class="card-header">
+                        <h3>路单分析</h3>
+                        <button class="pattern-refresh-btn">
+                            <span class="material-icons-round">refresh</span>
+                        </button>
+                    </div>
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <div class="analysis-icon">
+                                <span class="material-icons-round">insights</span>
+                            </div>
+                            <div class="analysis-content">
+                                <div class="analysis-title">当前形态</div>
+                                <div class="analysis-value" id="current-pattern">分析中...</div>
+                            </div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-icon">
+                                <span class="material-icons-round">trending_up</span>
+                            </div>
+                            <div class="analysis-content">
+                                <div class="analysis-title">路单趋势</div>
+                                <div class="analysis-value" id="pattern-trend">分析中...</div>
+                            </div>
+                        </div>
+                        <div class="analysis-card">
+                            <div class="analysis-icon">
+                                <span class="material-icons-round">psychology</span>
+                            </div>
+                            <div class="analysis-content">
+                                <div class="analysis-title">预测建议</div>
+                                <div class="analysis-value" id="pattern-suggestion">分析中...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 路单统计 -->
+                <div class="pattern-stats-card">
+                    <div class="card-header">
+                        <h3>路单统计</h3>
+                        <div class="stats-period">
+                            <span>最近50期</span>
+                        </div>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-table">
+                            <div class="stats-row">
+                                <span class="stats-label">大小路跳数</span>
+                                <span class="stats-value" id="size-total-jumps">0</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stats-label">单双路跳数</span>
+                                <span class="stats-value" id="parity-total-jumps">0</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stats-label">颜色路跳数</span>
+                                <span class="stats-value" id="color-total-jumps">0</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stats-label">最长连庄</span>
+                                <span class="stats-value" id="max-streak">0</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stats-label">规律性指数</span>
+                                <span class="stats-value" id="pattern-index">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 路单预测 -->
+                <div class="pattern-prediction-card">
+                    <div class="card-header">
+                        <h3>下期路单预测</h3>
+                        <div class="prediction-confidence">
+                            <span class="confidence-label">置信度</span>
+                            <span class="confidence-value" id="prediction-confidence">0%</span>
+                        </div>
+                    </div>
+                    <div class="prediction-content">
+                        <div class="prediction-item">
+                            <div class="prediction-type">大小预测</div>
+                            <div class="prediction-result" id="size-prediction">
+                                <span class="prediction-choice active">大</span>
+                                <span class="prediction-choice">小</span>
+                            </div>
+                            <div class="prediction-prob" id="size-prob">78%</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-type">单双预测</div>
+                            <div class="prediction-result" id="parity-prediction">
+                                <span class="prediction-choice">单</span>
+                                <span class="prediction-choice active">双</span>
+                            </div>
+                            <div class="prediction-prob" id="parity-prob">65%</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-type">颜色预测</div>
+                            <div class="prediction-result" id="color-prediction">
+                                <span class="prediction-choice active red">红</span>
+                                <span class="prediction-choice green">绿</span>
+                                <span class="prediction-choice purple">紫</span>
+                            </div>
+                            <div class="prediction-prob" id="color-prob">72%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page" id="strategy">
+            <header class="page-header">
+                <div class="header-content">
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
+                    </button>
+                    <h1>投注策略</h1>
+                    <button class="header-btn strategy-settings-btn">
+                        <span class="material-icons-round">tune</span>
+                    </button>
+                </div>
+            </header>
+            <div class="page-content">
+                <!-- 策略类型选择 -->
+                <div class="strategy-selector-card">
+                    <div class="card-header">
+                        <h3>选择策略</h3>
+                        <div class="strategy-status">
+                            <span class="status-dot active"></span>
+                            <span>智能推荐</span>
+                        </div>
+                    </div>
+                    <div class="strategy-grid">
+                        <div class="strategy-item active" data-strategy="ai">
+                            <div class="strategy-icon">
+                                <span class="material-icons-round">auto_awesome</span>
+                            </div>
+                            <div class="strategy-info">
+                                <div class="strategy-name">AI智能</div>
+                                <div class="strategy-desc">机器学习预测</div>
+                                <div class="strategy-rate">胜率: 78%</div>
+                            </div>
+                        </div>
+                        <div class="strategy-item" data-strategy="follow">
+                            <div class="strategy-icon">
+                                <span class="material-icons-round">trending_up</span>
+                            </div>
+                            <div class="strategy-info">
+                                <div class="strategy-name">跟庄策略</div>
+                                <div class="strategy-desc">跟随热门趋势</div>
+                                <div class="strategy-rate">胜率: 65%</div>
+                            </div>
+                        </div>
+                        <div class="strategy-item" data-strategy="reverse">
+                            <div class="strategy-icon">
+                                <span class="material-icons-round">trending_down</span>
+                            </div>
+                            <div class="strategy-info">
+                                <div class="strategy-name">反庄策略</div>
+                                <div class="strategy-desc">反向投注冷门</div>
+                                <div class="strategy-rate">胜率: 58%</div>
+                            </div>
+                        </div>
+                        <div class="strategy-item" data-strategy="martin">
+                            <div class="strategy-icon">
+                                <span class="material-icons-round">account_balance</span>
+                            </div>
+                            <div class="strategy-info">
+                                <div class="strategy-name">马丁策略</div>
+                                <div class="strategy-desc">递进式投注</div>
+                                <div class="strategy-rate">胜率: 72%</div>
+                            </div>
+                        </div>
+                        <div class="strategy-item" data-strategy="flat">
+                            <div class="strategy-icon">
+                                <span class="material-icons-round">horizontal_rule</span>
+                            </div>
+                            <div class="strategy-info">
+                                <div class="strategy-name">平投策略</div>
+                                <div class="strategy-desc">固定金额投注</div>
+                                <div class="strategy-rate">胜率: 52%</div>
+                            </div>
+                        </div>
+                        <div class="strategy-item" data-strategy="wave">
+                            <div class="strategy-icon">
+                                <span class="material-icons-round">waves</span>
+                            </div>
+                            <div class="strategy-info">
+                                <div class="strategy-name">波浪策略</div>
+                                <div class="strategy-desc">波段式投注</div>
+                                <div class="strategy-rate">胜率: 68%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 当前策略详情 -->
+                <div class="current-strategy-card">
+                    <div class="card-header">
+                        <h3 id="current-strategy-name">AI智能策略</h3>
+                        <div class="strategy-actions">
+                            <button class="action-btn-sm" id="strategy-backtest-btn">
+                                <span class="material-icons-round">history</span>
+                                回测
+                            </button>
+                        </div>
+                    </div>
+                    <div class="strategy-details">
+                        <div class="strategy-description" id="strategy-description">
+                            基于机器学习算法，分析历史数据和实时趋势，智能推荐最优投注方案。综合考虑号码热度、路单规律、形态分析等多维度因素。
+                        </div>
+                        <div class="strategy-params">
+                            <div class="param-group">
+                                <label>基础投注金额</label>
+                                <div class="amount-selector">
+                                    <button class="amount-btn" data-amount="10">10</button>
+                                    <button class="amount-btn active" data-amount="50">50</button>
+                                    <button class="amount-btn" data-amount="100">100</button>
+                                    <button class="amount-btn" data-amount="200">200</button>
+                                    <input type="number" class="custom-amount" placeholder="自定义">
+                                </div>
+                            </div>
+                            <div class="param-group">
+                                <label>盈利目标</label>
+                                <select class="param-select" id="profit-target">
+                                    <option value="100">100元</option>
+                                    <option value="200" selected>200元</option>
+                                    <option value="500">500元</option>
+                                    <option value="1000">1000元</option>
+                                </select>
+                            </div>
+                            <div class="param-group">
+                                <label>止损设置</label>
+                                <select class="param-select" id="stop-loss">
+                                    <option value="100">100元</option>
+                                    <option value="200" selected>200元</option>
+                                    <option value="300">300元</option>
+                                    <option value="500">500元</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实时投注建议 -->
+                <div class="recommendation-card">
+                    <div class="card-header">
+                        <h3>实时投注建议</h3>
+                        <div class="recommendation-confidence">
+                            <span class="confidence-label">置信度</span>
+                            <span class="confidence-value" id="recommendation-confidence">84%</span>
+                        </div>
+                    </div>
+                    <div class="recommendation-content">
+                        <div class="recommendation-main">
+                            <div class="recommendation-type">推荐投注</div>
+                            <div class="recommendation-details">
+                                <div class="recommendation-numbers" id="recommendation-numbers">
+                                    <div class="rec-number primary">7</div>
+                                    <div class="rec-number">3</div>
+                                    <div class="rec-number">9</div>
+                                </div>
+                                <div class="recommendation-patterns" id="recommendation-patterns">
+                                    <span class="pattern-tag active">大</span>
+                                    <span class="pattern-tag active">单</span>
+                                    <span class="pattern-tag">红</span>
+                                </div>
+                            </div>
+                            <div class="recommendation-amount">
+                                <span class="amount-label">建议金额:</span>
+                                <span class="amount-value" id="recommendation-amount">50元</span>
+                            </div>
+                        </div>
+                        <div class="recommendation-reason">
+                            <div class="reason-title">推荐理由</div>
+                            <div class="reason-text" id="recommendation-reason">
+                                基于AI分析，号码7在近期表现活跃，大单形态连续出现3期，预测下期继续维持该趋势的概率较高。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 策略统计 -->
+                <div class="strategy-stats-card">
+                    <div class="card-header">
+                        <h3>策略统计</h3>
+                        <div class="stats-period-selector">
+                            <button class="period-btn active" data-period="today">今日</button>
+                            <button class="period-btn" data-period="week">本周</button>
+                            <button class="period-btn" data-period="month">本月</button>
+                        </div>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-overview">
+                            <div class="stat-item">
+                                <div class="stat-value profit" id="total-profit">+¥248</div>
+                                <div class="stat-label">总盈亏</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="win-rate">72%</div>
+                                <div class="stat-label">胜率</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="total-bets">15</div>
+                                <div class="stat-label">投注次数</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="max-streak">5</div>
+                                <div class="stat-label">最长连胜</div>
+                            </div>
+                        </div>
+                        <div class="profit-chart">
+                            <div class="chart-header">
+                                <span>盈亏趋势</span>
+                            </div>
+                            <div class="chart-container" id="profit-chart">
+                                <!-- 动态生成图表 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 投注记录 -->
+                <div class="bet-history-card">
+                    <div class="card-header">
+                        <h3>投注记录</h3>
+                        <button class="action-btn-sm" id="clear-history-btn">
+                            <span class="material-icons-round">delete</span>
+                            清空
+                        </button>
+                    </div>
+                    <div class="bet-history-list" id="bet-history-list">
+                        <!-- 动态生成投注记录 -->
+                    </div>
+                </div>
+
+                <!-- 策略回测模态框 -->
+                <div class="strategy-modal hidden" id="backtest-modal">
+                    <div class="modal-overlay"></div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>策略回测</h3>
+                            <button class="modal-close" id="close-backtest-modal">
+                                <span class="material-icons-round">close</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="backtest-params">
+                                <div class="param-row">
+                                    <label>回测期数</label>
+                                    <select id="backtest-periods">
+                                        <option value="50">最近50期</option>
+                                        <option value="100" selected>最近100期</option>
+                                        <option value="200">最近200期</option>
+                                    </select>
+                                </div>
+                                <div class="param-row">
+                                    <label>初始资金</label>
+                                    <input type="number" id="initial-capital" value="1000" min="100">
+                                </div>
+                            </div>
+                            <div class="backtest-actions">
+                                <button class="action-btn primary" id="run-backtest-btn">开始回测</button>
+                            </div>
+                            <div class="backtest-results hidden" id="backtest-results">
+                                <div class="results-summary">
+                                    <div class="result-item">
+                                        <span class="result-label">总收益率</span>
+                                        <span class="result-value" id="backtest-return">+24.8%</span>
+                                    </div>
+                                    <div class="result-item">
+                                        <span class="result-label">最大回撤</span>
+                                        <span class="result-value" id="backtest-drawdown">-8.2%</span>
+                                    </div>
+                                    <div class="result-item">
+                                        <span class="result-label">夏普比率</span>
+                                        <span class="result-value" id="backtest-sharpe">1.45</span>
+                                    </div>
+                                    <div class="result-item">
+                                        <span class="result-label">胜率</span>
+                                        <span class="result-value" id="backtest-winrate">68%</span>
+                                    </div>
+                                </div>
+                                <div class="backtest-chart">
+                                    <div class="chart-title">资金曲线</div>
+                                    <div class="chart-display" id="backtest-chart">
+                                        <!-- 回测图表 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-page="home">
+                <span class="material-icons-round">home</span>
+                <span>首页</span>
+            </div>
+            <div class="nav-item" data-page="predict">
+                <span class="material-icons-round">auto_awesome</span>
+                <span>预测</span>
+            </div>
+            <div class="nav-item" data-page="trend">
+                <span class="material-icons-round">trending_up</span>
+                <span>走势</span>
+            </div>
+            <div class="nav-item" data-page="pattern">
+                <span class="material-icons-round">grid_view</span>
+                <span>路单</span>
+            </div>
+            <div class="nav-item" data-page="strategy">
+                <span class="material-icons-round">military_tech</span>
+                <span>策略</span>
+            </div>
+        </nav>
+
+        <!-- 快速预览按钮 -->
+        <button class="quick-preview-btn">
+            <span class="material-icons-round">visibility</span>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 

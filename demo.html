@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页历史记录功能演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .demo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .demo-header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .demo-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .demo-content {
+            padding: 30px 20px;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        .feature-content h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .feature-content p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .demo-actions {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .demo-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        
+        .demo-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .demo-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .highlight-box h3 {
+            color: #2d3436;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-box p {
+            color: #636e72;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>🎯 历史记录功能</h1>
+            <p>首页历史记录功能已完善</p>
+        </div>
+        
+        <div class="demo-content">
+            <ul class="feature-list">
+                <li class="feature-item">
+                    <div class="feature-icon">🔍</div>
+                    <div class="feature-content">
+                        <h3>智能过滤器 <span class="status-badge">新增</span></h3>
+                        <p>支持按大小、单双、颜色筛选历史记录，快速找到想要的数据</p>
+                    </div>
+                </li>
+                
+                <li class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-content">
+                        <h3>统计卡片 <span class="status-badge">增强</span></h3>
+                        <p>显示当前连号、最热/冷号码、更新时间等关键统计信息</p>
+                    </div>
+                </li>
+                
+                <li class="feature-item">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-content">
+                        <h3>详情模态框 <span class="status-badge">新增</span></h3>
+                        <p>点击历史记录项查看详细开奖信息和分析数据</p>
+                    </div>
+                </li>
+                
+                <li class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-content">
+                        <h3>加载更多 <span class="status-badge">优化</span></h3>
+                        <p>支持分页加载历史记录，提升页面性能和用户体验</p>
+                    </div>
+                </li>
+                
+                <li class="feature-item">
+                    <div class="feature-icon">📲</div>
+                    <div class="feature-content">
+                        <h3>移动端优化 <span class="status-badge">完善</span></h3>
+                        <p>针对移动设备优化交互，支持触摸操作和下拉刷新</p>
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="highlight-box">
+                <h3>🚀 主要改进</h3>
+                <p>增强了首页历史记录的交互性和实用性，提供更丰富的数据展示和筛选功能，让用户能够更便捷地查看和分析历史开奖数据。</p>
+            </div>
+        </div>
+        
+        <div class="demo-actions">
+            <a href="index.html" class="demo-btn primary">查看完整应用</a>
+            <a href="test.html" class="demo-btn secondary">功能测试</a>
+        </div>
+    </div>
+    
+    <script>
+        // 简单的演示交互
+        document.querySelectorAll('.feature-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.style.background = '#f8f9fa';
+                setTimeout(() => {
+                    item.style.background = '';
+                }, 200);
+            });
+        });
+        
+        // 添加一些动画效果
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+        
+        document.querySelectorAll('.feature-item').forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = `all 0.5s ease ${index * 0.1}s`;
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html> 

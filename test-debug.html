@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wingo调试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-info { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .warning { background: #fff3e0; color: #f57c00; }
+        .loader-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #6366f1, #4f46e5); 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 9999; color: white; 
+        }
+        .loader-screen.hidden { display: none; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="loader-screen" id="loader">
+        <div>加载中...</div>
+    </div>
+    
+    <div id="app">
+        <h1>Wingo首页调试</h1>
+        
+        <div class="debug-info">
+            <strong>调试状态:</strong>
+            <div id="debugStatus">正在初始化...</div>
+        </div>
+        
+        <button onclick="testBasicFunctions()">测试基础功能</button>
+        <button onclick="testDataGeneration()">测试数据生成</button>
+        <button onclick="testElementSelection()">测试元素选择</button>
+        <button onclick="location.reload()">重新加载</button>
+        
+        <div id="testResults"></div>
+        
+        <!-- 模拟首页元素 -->
+        <div class="stats-grid">
+            <div class="stat-card" data-stat="big">
+                <div class="stat-value" id="bigPercent">0%</div>
+                <div class="stat-label">大号概率</div>
+            </div>
+            <div class="stat-card" data-stat="small">
+                <div class="stat-value" id="smallPercent">0%</div>
+                <div class="stat-label">小号概率</div>
+            </div>
+        </div>
+        
+        <div class="hot-numbers-list" id="hotNumbersList"></div>
+        <div class="recent-history-list" id="recentHistoryList"></div>
+    </div>
+
+    <script>
+        console.log('=== Wingo调试页面启动 ===');
+        
+        let debugResults = [];
+        
+        function updateDebugStatus(message, type = 'info') {
+            const status = document.getElementById('debugStatus');
+            status.innerHTML += `<div class="${type}">${new Date().toLocaleTimeString()}: ${message}</div>`;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function testBasicFunctions() {
+            updateDebugStatus('开始测试基础功能...');
+            
+            try {
+                // 测试常量定义
+                if (typeof APP_CONSTANTS !== 'undefined') {
+                    updateDebugStatus('✓ APP_CONSTANTS 已定义', 'success');
+                    updateDebugStatus(`页面常量: ${Object.keys(APP_CONSTANTS.PAGES).join(', ')}`, 'success');
+                } else {
+                    updateDebugStatus('✗ APP_CONSTANTS 未定义', 'error');
+                }
+                
+                // 测试类定义
+                if (typeof AppUtils !== 'undefined') {
+                    updateDebugStatus('✓ AppUtils 类已定义', 'success');
+                    
+                    // 测试工具方法
+                    const testElement = AppUtils.getElement('#debugStatus');
+                    if (testElement) {
+                        updateDebugStatus('✓ AppUtils.getElement 工作正常', 'success');
+                    } else {
+                        updateDebugStatus('✗ AppUtils.getElement 无法找到元素', 'error');
+                    }
+                } else {
+                    updateDebugStatus('✗ AppUtils 类未定义', 'error');
+                }
+                
+                if (typeof WingoApp !== 'undefined') {
+                    updateDebugStatus('✓ WingoApp 类已定义', 'success');
+                } else {
+                    updateDebugStatus('✗ WingoApp 类未定义', 'error');
+                }
+                
+            } catch (error) {
+                updateDebugStatus(`✗ 基础功能测试失败: ${error.message}`, 'error');
+            }
+        }
+        
+        function testDataGeneration() {
+            updateDebugStatus('开始测试数据生成...');
+            
+            try {
+                if (typeof WingoApp !== 'undefined') {
+                    const app = new WingoApp();
+                    updateDebugStatus('✓ WingoApp 实例创建成功', 'success');
+                    
+                    // 测试历史数据生成
+                    app.generateFallbackHistoryData();
+                    if (app.historyData && app.historyData.length > 0) {
+                        updateDebugStatus(`✓ 历史数据生成成功: ${app.historyData.length} 条记录`, 'success');
+                        
+                        // 测试统计更新
+                        app.updateStats();
+                        updateDebugStatus('✓ 统计数据更新完成', 'success');
+                        
+                        // 测试热门号码生成
+                        app.generateHotNumbers();
+                        updateDebugStatus('✓ 热门号码生成完成', 'success');
+                        
+                    } else {
+                        updateDebugStatus('✗ 历史数据生成失败', 'error');
+                    }
+                } else {
+                    updateDebugStatus('✗ WingoApp 类不可用', 'error');
+                }
+                
+            } catch (error) {
+                updateDebugStatus(`✗ 数据生成测试失败: ${error.message}`, 'error');
+                console.error('数据生成详细错误:', error);
+            }
+        }
+        
+        function testElementSelection() {
+            updateDebugStatus('开始测试元素选择...');
+            
+            const testSelectors = [
+                '#bigPercent',
+                '#smallPercent', 
+                '#hotNumbersList',
+                '#recentHistoryList',
+                '.stat-card',
+                '.nav-item'
+            ];
+            
+            testSelectors.forEach(selector => {
+                try {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        updateDebugStatus(`✓ 找到元素: ${selector}`, 'success');
+                    } else {
+                        updateDebugStatus(`✗ 未找到元素: ${selector}`, 'warning');
+                    }
+                } catch (error) {
+                    updateDebugStatus(`✗ 选择器错误 ${selector}: ${error.message}`, 'error');
+                }
+            });
+        }
+        
+        // 页面加载完成后运行初始测试
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDebugStatus('DOM加载完成');
+            
+            // 延迟加载原始脚本
+            const script = document.createElement('script');
+            script.src = 'script.js';
+            script.onload = () => {
+                updateDebugStatus('✓ script.js 加载完成', 'success');
+                setTimeout(() => {
+                    testBasicFunctions();
+                    
+                    // 隐藏加载屏幕
+                    setTimeout(() => {
+                        const loader = document.getElementById('loader');
+                        if (loader) {
+                            loader.classList.add('hidden');
+                            updateDebugStatus('✓ 加载屏幕已隐藏', 'success');
+                        }
+                    }, 1000);
+                }, 100);
+            };
+            script.onerror = () => {
+                updateDebugStatus('✗ script.js 加载失败', 'error');
+            };
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html> 

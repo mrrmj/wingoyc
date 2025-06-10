@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wingo - 最小化版本</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        
+        .loader-screen { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; display: flex; align-items: center; justify-content: center; 
+            flex-direction: column; z-index: 9999; 
+        }
+        .loader-screen.hidden { opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        .page-content { padding: 20px; max-width: 400px; margin: 0 auto; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; 
+                     box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-value { font-size: 24px; font-weight: bold; color: #333; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+        
+        .hot-numbers-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+        .hot-number-item { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                           color: white; padding: 12px; border-radius: 8px; font-weight: bold; }
+        
+        .recent-history-list { margin: 20px 0; }
+        .history-item { background: white; padding: 15px; margin: 10px 0; border-radius: 8px; 
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        .section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #333; }
+        
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; 
+                   box-shadow: 0 -2px 10px rgba(0,0,0,0.1); display: flex; }
+        .nav-item { flex: 1; padding: 15px; text-align: center; cursor: pointer; 
+                    transition: background 0.2s; }
+        .nav-item:hover { background: #f8f9fa; }
+        .nav-item.active { background: #667eea; color: white; }
+    </style>
+</head>
+<body>
+    <!-- 加载屏幕 -->
+    <div class="loader-screen">
+        <div style="font-size: 48px; margin-bottom: 20px;">🎯</div>
+        <div style="font-size: 20px; margin-bottom: 10px;">Wingo</div>
+        <div>正在初始化...</div>
+    </div>
+
+    <!-- 主应用 -->
+    <div class="app-container">
+        <!-- 首页 -->
+        <div class="page active" id="home">
+            <div class="page-content">
+                <h1 style="text-align: center; margin-bottom: 30px; color: #333;">🎯 Wingo分析</h1>
+                
+                <div class="section-title">📊 数据统计</div>
+                <div class="stats-grid">
+                    <div class="stat-card" data-stat="big">
+                        <div class="stat-value" id="bigPercent">-</div>
+                        <div class="stat-label">大号概率</div>
+                    </div>
+                    <div class="stat-card" data-stat="small">
+                        <div class="stat-value" id="smallPercent">-</div>
+                        <div class="stat-label">小号概率</div>
+                    </div>
+                    <div class="stat-card" data-stat="odd">
+                        <div class="stat-value" id="oddPercent">-</div>
+                        <div class="stat-label">单号概率</div>
+                    </div>
+                    <div class="stat-card" data-stat="even">
+                        <div class="stat-value" id="evenPercent">-</div>
+                        <div class="stat-label">双号概率</div>
+                    </div>
+                </div>
+                
+                <div class="section-title">🔥 热门号码</div>
+                <div class="hot-numbers-list">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <div class="section-title">📈 最近开奖</div>
+                <div class="recent-history-list" id="recentHistoryList">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <div style="height: 80px;"></div> <!-- 底部导航空间 -->
+            </div>
+        </div>
+        
+        <!-- 预测页面 -->
+        <div class="page" id="predict">
+            <div class="page-content">
+                <h2>🎯 智能预测</h2>
+                <p>预测功能开发中...</p>
+            </div>
+        </div>
+        
+        <!-- 其他页面类似... -->
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="nav-bar">
+        <div class="nav-item active" data-page="home">首页</div>
+        <div class="nav-item" data-page="predict">预测</div>
+        <div class="nav-item" data-page="trend">走势</div>
+        <div class="nav-item" data-page="pattern">路单</div>
+        <div class="nav-item" data-page="strategy">策略</div>
+    </div>
+
+    <script>
+        // 最小化的应用类
+        class MinimalWingoApp {
+            constructor() {
+                this.historyData = [];
+                this.currentPage = 'home';
+            }
+
+            async init() {
+                console.log('开始初始化最小化应用...');
+                
+                try {
+                    // 设置导航事件
+                    this.setupNavigation();
+                    
+                    // 异步获取数据
+                    await this.loadData();
+                    
+                    // 更新UI
+                    this.updateUI();
+                    
+                    // 隐藏加载屏幕
+                    setTimeout(() => {
+                        this.hideLoader();
+                        console.log('应用初始化完成！');
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('初始化失败:', error);
+                    this.showError(error.message);
+                }
+            }
+
+            setupNavigation() {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const page = item.getAttribute('data-page');
+                        this.navigateToPage(page);
+                    });
+                });
+            }
+
+            navigateToPage(pageId) {
+                // 移除所有页面的active类
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // 移除所有导航项的active类
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // 激活目标页面和导航项
+                const targetPage = document.getElementById(pageId);
+                const targetNav = document.querySelector(`[data-page="${pageId}"]`);
+                
+                if (targetPage) targetPage.classList.add('active');
+                if (targetNav) targetNav.classList.add('active');
+                
+                this.currentPage = pageId;
+                console.log(`导航到页面: ${pageId}`);
+            }
+
+            async loadData() {
+                console.log('开始加载数据...');
+                
+                try {
+                    // 尝试从API获取数据
+                    const apiUrl = 'https://draw.ar-lottery01.com/MotoRace/MotoRace_1M/GetHistoryIssuePage.json?ts=' + Date.now();
+                    const response = await fetch(apiUrl);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('API数据获取成功');
+                        this.processApiData(data);
+                    } else {
+                        throw new Error('API请求失败');
+                    }
+                } catch (error) {
+                    console.warn('API请求失败，使用模拟数据:', error.message);
+                    this.generateMockData();
+                }
+            }
+
+            processApiData(data) {
+                if (data?.data?.length > 0) {
+                    this.historyData = data.data.slice(0, 20).map((item, index) => {
+                        const number = item.number || Math.floor(Math.random() * 10);
+                        return {
+                            number,
+                            period: item.period || `2024${(1000 + index).toString()}`,
+                            size: number >= 5 ? 'big' : 'small',
+                            parity: number % 2 === 0 ? 'even' : 'odd',
+                            color: this.getNumberColor(number),
+                            time: new Date(item.time || Date.now() - index * 180000).toLocaleString()
+                        };
+                    });
+                } else {
+                    this.generateMockData();
+                }
+            }
+
+            generateMockData() {
+                this.historyData = Array.from({length: 20}, (_, i) => {
+                    const number = Math.floor(Math.random() * 10);
+                    return {
+                        number,
+                        period: `2024${(1000 + i).toString()}`,
+                        size: number >= 5 ? 'big' : 'small',
+                        parity: number % 2 === 0 ? 'even' : 'odd',
+                        color: this.getNumberColor(number),
+                        time: new Date(Date.now() - i * 180000).toLocaleString()
+                    };
+                });
+                console.log('生成模拟数据完成');
+            }
+
+            getNumberColor(number) {
+                if ([1, 3, 7, 9].includes(number)) return 'red';
+                if ([0, 5].includes(number)) return 'violet';
+                return 'green';
+            }
+
+            updateUI() {
+                this.updateStats();
+                this.updateHotNumbers();
+                this.updateRecentHistory();
+            }
+
+            updateStats() {
+                const bigCount = this.historyData.filter(item => item.size === 'big').length;
+                const oddCount = this.historyData.filter(item => item.parity === 'odd').length;
+                const total = this.historyData.length;
+
+                document.getElementById('bigPercent').textContent = `${(bigCount/total*100).toFixed(1)}%`;
+                document.getElementById('smallPercent').textContent = `${((total-bigCount)/total*100).toFixed(1)}%`;
+                document.getElementById('oddPercent').textContent = `${(oddCount/total*100).toFixed(1)}%`;
+                document.getElementById('evenPercent').textContent = `${((total-oddCount)/total*100).toFixed(1)}%`;
+            }
+
+            updateHotNumbers() {
+                const frequency = {};
+                this.historyData.forEach(item => {
+                    frequency[item.number] = (frequency[item.number] || 0) + 1;
+                });
+
+                const hotNumbers = Object.entries(frequency)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 6);
+
+                const hotNumbersList = document.querySelector('.hot-numbers-list');
+                hotNumbersList.innerHTML = hotNumbers.map(([num, count]) => 
+                    `<div class="hot-number-item">${num} (${count})</div>`
+                ).join('');
+            }
+
+            updateRecentHistory() {
+                const historyList = document.getElementById('recentHistoryList');
+                historyList.innerHTML = this.historyData.slice(0, 8).map(item => `
+                    <div class="history-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>期号: ${item.period}</strong><br>
+                                <small>${item.time}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #667eea;">${item.number}</div>
+                                <div style="font-size: 12px; color: #666;">${item.size}/${item.parity}/${item.color}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            hideLoader() {
+                const loader = document.querySelector('.loader-screen');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }
+
+            showError(message) {
+                alert(`错误: ${message}\n\n请刷新页面重试。`);
+            }
+        }
+
+        // 启动应用
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOM加载完成，启动最小化应用...');
+            
+            try {
+                const app = new MinimalWingoApp();
+                await app.init();
+                
+                // 全局访问
+                window.app = app;
+                
+                console.log('最小化应用启动成功！');
+            } catch (error) {
+                console.error('应用启动失败:', error);
+                alert('应用启动失败，请刷新页面重试。');
+            }
+        });
+    </script>
+</body>
+</html> 
