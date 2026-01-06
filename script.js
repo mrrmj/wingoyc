@@ -3,7 +3,7 @@
 // API Service Class - Get real draw data
 class ApiService {
     constructor() {
-        this.baseUrl = 'https://draw.ar-lottery01.com/WinGo/WinGo_1M';
+        this.baseUrl = 'http://localhost:3001/api';
         this.cache = new Map();
         this.cacheTimeout = 60000; // 1 minute cache
     }
@@ -278,7 +278,7 @@ const APP_CONSTANTS = {
         PAGES: '.page'
     },
     API: {
-        HISTORY_URL: 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json',
+        HISTORY_URL: 'http://localhost:3001/api/latest',
         TIMEOUT: 10000,
         CACHE_DURATION: 60000
     },
