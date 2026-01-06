@@ -6,14 +6,13 @@
     <title>Wingo Lottery Analysis Assistant</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Loading Screen -->
-    <div class="loader-screen" id="loaderScreen">
+    <div class="loader-screen">
         <div class="loader-content">
             <div class="loader-logo">
-                <i class="fas fa-dice"></i>
+                <span class="material-icons-round">casino</span>
             </div>
             <div class="loader-text">Wingo Professional Analysis</div>
             <div class="loader-progress">
@@ -21,7 +20,6 @@
             </div>
         </div>
     </div>
-
     <!-- App Main Container -->
     <div class="app-container" id="app">
         <!-- Home Page -->
@@ -31,7 +29,7 @@
                 <div class="header-content">
                     <div class="header-left">
                         <div class="app-logo">
-                            <i class="fas fa-dice"></i>
+                            <span class="material-icons-round">casino</span>
                         </div>
                         <div class="app-info">
                             <h1>Wingo Analysis</h1>
@@ -39,17 +37,16 @@
                         </div>
                     </div>
                     <div class="header-right">
-                        <button class="header-btn notification-btn" id="notificationBtn">
-                            <i class="fas fa-bell"></i>
+                        <button class="header-btn notification-btn">
+                            <span class="material-icons-round">notifications</span>
                             <span class="badge"></span>
                         </button>
-                        <button class="header-btn settings-btn" id="settingsBtn">
-                            <i class="fas fa-cog"></i>
+                        <button class="header-btn settings-btn">
+                            <span class="material-icons-round">settings</span>
                         </button>
                     </div>
                 </div>
             </header>
-
             <!-- Page Content -->
             <div class="page-content">
                 <!-- Live Draw Card -->
@@ -58,7 +55,7 @@
                         <div class="data-status-dot"></div>
                         <span>Live Data</span>
                     </div>
-                    
+                   
                     <div class="live-header">
                         <div class="live-title">
                             <h2>Live Draw</h2>
@@ -68,7 +65,7 @@
                             </div>
                         </div>
                     </div>
-                    
+                   
                     <div class="live-content">
                         <div class="countdown-section">
                             <div class="countdown-timer">
@@ -77,73 +74,72 @@
                             </div>
                             <div class="period-info">
                                 <div class="period-label">Current Period</div>
-                                <div class="period-number" id="periodNumber">No. 20240001</div>
+                                <div class="period-number" id="currentPeriod">20240001</div>
                             </div>
                         </div>
-                        
+                       
                         <div class="result-section">
                             <div class="result-label">Last Draw Result</div>
                             <div class="result-display">
-                                <div class="result-ball red">8</div>
+                                <div class="result-ball red" id="lastResult">8</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Features Grid -->
                 <div class="features-section">
                     <div class="section-header">
-                        <h2>Function Analysis</h2>
-                        <button class="view-all-btn" id="viewAllBtn">View All</button>
+                        <h2>Feature Analysis</h2>
+                        <button class="view-all-btn">View All</button>
                     </div>
-                    
+                   
                     <div class="features-grid">
                         <div class="feature-card main-feature" data-page="predict">
                             <div class="feature-icon primary">
-                                <i class="fas fa-brain"></i>
+                                <span class="material-icons-round">auto_awesome</span>
                             </div>
                             <div class="feature-content">
                                 <h3>AI Prediction</h3>
                                 <p>AI Data Analysis, Accurate Prediction</p>
                             </div>
                             <div class="feature-arrow">
-                                <i class="fas fa-chevron-right"></i>
+                                <span class="material-icons-round">arrow_forward_ios</span>
                             </div>
                         </div>
-                        
+                       
                         <div class="feature-card" data-page="history">
                             <div class="feature-icon purple">
-                                <i class="fas fa-history"></i>
+                                <span class="material-icons-round">history</span>
                             </div>
                             <div class="feature-content">
-                                <h3>History Record</h3>
+                                <h3>History Records</h3>
                                 <p>Draw Data Query</p>
                             </div>
                         </div>
-                        
+                       
                         <div class="feature-card" data-page="trend">
                             <div class="feature-icon green">
-                                <i class="fas fa-chart-line"></i>
+                                <span class="material-icons-round">trending_up</span>
                             </div>
                             <div class="feature-content">
                                 <h3>Trend Analysis</h3>
                                 <p>Number Trend Charts</p>
                             </div>
                         </div>
-                        
+                       
                         <div class="feature-card" data-page="pattern">
                             <div class="feature-icon orange">
-                                <i class="fas fa-border-all"></i>
+                                <span class="material-icons-round">grid_view</span>
                             </div>
                             <div class="feature-content">
-                                <h3>Road Analysis</h3>
-                                <p>Big/Small, Odd/Even Patterns</p>
+                                <h3>Pattern Analysis</h3>
+                                <p>Big/Small/Odd/Even Rules</p>
                             </div>
                         </div>
-                        
+                       
                         <div class="feature-card" data-page="strategy">
                             <div class="feature-icon blue">
-                                <i class="fas fa-chess-knight"></i>
+                                <span class="material-icons-round">military_tech</span>
                             </div>
                             <div class="feature-content">
                                 <h3>Betting Strategy</h3>
@@ -152,60 +148,57 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Data Statistics -->
                 <div class="stats-section">
                     <div class="section-header">
                         <h2>Data Statistics</h2>
                         <button class="refresh-stats-btn" id="refreshStatsBtn">
-                            <i class="fas fa-redo"></i>
+                            <span class="material-icons-round">refresh</span>
                         </button>
                     </div>
-                    
+                   
                     <div class="stats-grid">
                         <div class="stat-card" data-stat="big">
                             <div class="stat-value" id="bigPercent">48.5%</div>
-                            <div class="stat-label">Big Number Probability</div>
+                            <div class="stat-label">Big Number Rate</div>
                         </div>
                         <div class="stat-card" data-stat="small">
                             <div class="stat-value" id="smallPercent">51.5%</div>
-                            <div class="stat-label">Small Number Probability</div>
+                            <div class="stat-label">Small Number Rate</div>
                         </div>
                         <div class="stat-card" data-stat="odd">
                             <div class="stat-value" id="oddPercent">49.8%</div>
-                            <div class="stat-label">Odd Number Probability</div>
+                            <div class="stat-label">Odd Number Rate</div>
                         </div>
                         <div class="stat-card" data-stat="even">
                             <div class="stat-value" id="evenPercent">50.2%</div>
-                            <div class="stat-label">Even Number Probability</div>
+                            <div class="stat-label">Even Number Rate</div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Hot Numbers -->
                 <div class="hot-numbers-section">
                     <div class="section-header">
                         <h2>Hot Numbers</h2>
                         <button class="view-all-btn" data-page="trend">More</button>
                     </div>
-                    
+                   
                     <div class="hot-numbers-list" id="hotNumbersList">
-                        <!-- Dynamic content will be generated here -->
+                        <!-- Dynamic Content -->
                     </div>
                 </div>
-
                 <!-- Recent Draws -->
                 <div class="recent-history-section">
                     <div class="section-header">
                         <h2>Recent Draws</h2>
                         <div class="section-actions">
                             <button class="filter-history-btn" id="filterHistoryBtn">
-                                <i class="fas fa-filter"></i>
+                                <span class="material-icons-round">filter_list</span>
                             </button>
                             <button class="view-all-btn" data-page="history">All</button>
                         </div>
                     </div>
-                    
+                   
                     <!-- History Filters -->
                     <div class="history-filters" id="historyFilters">
                         <div class="filter-tabs">
@@ -222,21 +215,21 @@
                             <button class="color-filter purple" data-color="purple">Purple</button>
                         </div>
                     </div>
-                    
+                   
                     <!-- History Stats Cards -->
                     <div class="history-stats-cards">
                         <div class="history-stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
+                                <span class="material-icons-round">trending_up</span>
                             </div>
                             <div class="stat-info">
-                                <div class="stat-value" id="currentStreak">3 Consecutive Big</div>
-                                <div class="stat-label">Current Consecutive</div>
+                                <div class="stat-value" id="currentStreak">3 Big Streak</div>
+                                <div class="stat-label">Current Streak</div>
                             </div>
                         </div>
                         <div class="history-stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-fire"></i>
+                                <span class="material-icons-round">star</span>
                             </div>
                             <div class="stat-info">
                                 <div class="stat-value" id="hotestNumber">7</div>
@@ -245,7 +238,7 @@
                         </div>
                         <div class="history-stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-snowflake"></i>
+                                <span class="material-icons-round">ac_unit</span>
                             </div>
                             <div class="stat-info">
                                 <div class="stat-value" id="coldestNumber">2</div>
@@ -254,63 +247,61 @@
                         </div>
                         <div class="history-stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-clock"></i>
+                                <span class="material-icons-round">access_time</span>
                             </div>
                             <div class="stat-info">
-                                <div class="stat-value" id="lastUpdate">Just Now</div>
+                                <div class="stat-value" id="lastUpdate">Just now</div>
                                 <div class="stat-label">Last Update</div>
                             </div>
                         </div>
                     </div>
-                    
+                   
                     <!-- Recent History List -->
                     <div class="recent-history-list" id="recentHistoryList">
-                        <!-- Dynamic content will be generated here -->
+                        <!-- Dynamic Content -->
                     </div>
-                    
+                   
                     <!-- Load More Button -->
                     <div class="load-more-section">
                         <button class="load-more-btn" id="loadMoreHistory">
-                            <i class="fas fa-chevron-down"></i>
-                            View More History Records
+                            <span class="material-icons-round">expand_more</span>
+                            View More History
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Prediction Page -->
         <div class="page" id="predict">
             <header class="page-header">
                 <div class="header-content">
-                    <button class="back-btn" id="backBtnPredict">
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
                     </button>
                     <h1>AI Prediction</h1>
-                    <button class="header-btn" id="predictSettingsBtn">
-                        <i class="fas fa-sliders-h"></i>
+                    <button class="header-btn">
+                        <span class="material-icons-round">tune</span>
                     </button>
                 </div>
             </header>
-
             <div class="page-content">
                 <!-- Prediction Card -->
                 <div class="prediction-card">
                     <div class="prediction-header">
                         <div class="prediction-badge">AI Prediction</div>
                         <div class="countdown-info">
-                            <i class="fas fa-clock"></i>
-                            <span class="countdown-text" id="predictCountdown">02:45</span>
+                            <span class="material-icons-round">timer</span>
+                            <span class="countdown-text">02:45</span>
                         </div>
                     </div>
-                    
+                   
                     <div class="prediction-content">
                         <div class="numbers-section">
                             <div class="section-title">
                                 <h3>Number Prediction</h3>
                                 <div class="confidence-level">Confidence 84%</div>
                             </div>
-                            
+                           
                             <div class="numbers-grid">
                                 <div class="number-item primary">
                                     <div class="number-value">7</div>
@@ -334,26 +325,26 @@
                                 </div>
                             </div>
                         </div>
-                        
+                       
                         <div class="patterns-section">
                             <div class="pattern-row">
-                                <div class="pattern-label">Size</div>
+                                <div class="pattern-label">Big/Small</div>
                                 <div class="pattern-options">
                                     <span class="pattern-chip active">Big</span>
                                     <span class="pattern-chip">Small</span>
                                 </div>
                                 <div class="pattern-probability">73%</div>
                             </div>
-                            
+                           
                             <div class="pattern-row">
-                                <div class="pattern-label">Parity</div>
+                                <div class="pattern-label">Odd/Even</div>
                                 <div class="pattern-options">
                                     <span class="pattern-chip active">Odd</span>
                                     <span class="pattern-chip">Even</span>
                                 </div>
                                 <div class="pattern-probability">68%</div>
                             </div>
-                            
+                           
                             <div class="pattern-row">
                                 <div class="pattern-label">Color</div>
                                 <div class="pattern-options">
@@ -365,48 +356,47 @@
                             </div>
                         </div>
                     </div>
-                    
+                   
                     <div class="prediction-actions">
-                        <button class="action-btn secondary" id="detailAnalysisBtn">
-                            <i class="fas fa-chart-bar"></i>
+                        <button class="action-btn secondary">
+                            <span class="material-icons-round">insights</span>
                             Detailed Analysis
                         </button>
-                        <button class="action-btn primary" id="refreshPredictionBtn">
-                            <i class="fas fa-redo"></i>
+                        <button class="action-btn primary">
+                            <span class="material-icons-round">refresh</span>
                             Refresh Prediction
                         </button>
                     </div>
                 </div>
-
                 <!-- Prediction Parameters -->
                 <div class="parameters-card">
                     <div class="card-header">
                         <h3>Prediction Parameters</h3>
-                        <button class="reset-btn" id="resetParamsBtn">Reset</button>
+                        <button class="reset-btn">Reset</button>
                     </div>
-                    
+                   
                     <div class="parameters-content">
                         <div class="parameter-item">
                             <div class="parameter-label">
-                                <span>Confidence</span>
-                                <span class="parameter-value" id="confidenceValue">0.8</span>
+                                <span>Confidence Level</span>
+                                <span class="parameter-value">0.8</span>
                             </div>
-                            <input type="range" class="parameter-slider" id="confidenceSlider" min="0.5" max="1" step="0.1" value="0.8">
+                            <input type="range" class="parameter-slider" min="0.5" max="1" step="0.1" value="0.8">
                         </div>
-                        
+                       
                         <div class="parameter-item">
                             <div class="parameter-label">
                                 <span>Prediction Periods</span>
-                                <span class="parameter-value" id="periodsValue">30</span>
+                                <span class="parameter-value">30</span>
                             </div>
-                            <input type="range" class="parameter-slider" id="periodsSlider" min="10" max="100" value="30">
+                            <input type="range" class="parameter-slider" min="10" max="100" value="30">
                         </div>
-                        
+                       
                         <div class="parameter-item">
                             <div class="parameter-label">
                                 <span>Pattern Type</span>
                             </div>
-                            <select class="parameter-select" id="patternTypeSelect">
+                            <select class="parameter-select">
                                 <option value="normal">Normal Pattern</option>
                                 <option value="special">Special Pattern</option>
                                 <option value="repeated">Repeated Pattern</option>
@@ -414,53 +404,49 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Prediction History -->
                 <div class="history-card">
                     <div class="card-header">
                         <h3>Prediction History</h3>
-                        <button class="clear-history-btn" id="clearPredictionHistoryBtn">Clear</button>
+                        <button class="clear-history-btn">Clear</button>
                     </div>
-                    
-                    <div class="history-list" id="predictionHistoryList">
-                        <!-- Dynamic content will be generated here -->
+                   
+                    <div class="history-list">
+                        <!-- Dynamic Content -->
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- History Page -->
+        <!-- Other Page Placeholders -->
         <div class="page" id="history">
             <header class="page-header">
                 <div class="header-content">
-                    <button class="back-btn" id="backBtnHistory">
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
                     </button>
-                    <h1>History Record</h1>
-                    <button class="header-btn" id="historyCalendarBtn">
-                        <i class="fas fa-calendar-alt"></i>
+                    <h1>History Records</h1>
+                    <button class="header-btn">
+                        <span class="material-icons-round">calendar_today</span>
                     </button>
                 </div>
             </header>
             <div class="page-content">
                 <div class="placeholder-content">
-                    <i class="fas fa-history"></i>
-                    <h3>History Record</h3>
+                    <span class="material-icons-round">history</span>
+                    <h3>History Records</h3>
                     <p>View draw history data</p>
                 </div>
             </div>
         </div>
-
-        <!-- Trend Page -->
         <div class="page" id="trend">
             <header class="page-header">
                 <div class="header-content">
-                    <button class="back-btn" id="backBtnTrend">
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
                     </button>
                     <h1>Trend Analysis</h1>
-                    <button class="header-btn filter-btn" id="trendFilterBtn">
-                        <i class="fas fa-filter"></i>
+                    <button class="header-btn filter-btn">
+                        <span class="material-icons-round">filter_list</span>
                     </button>
                 </div>
             </header>
@@ -468,11 +454,10 @@
                 <!-- Chart Type Toggle -->
                 <div class="chart-tabs">
                     <div class="tab-item active" data-chart="number">Number Trend</div>
-                    <div class="tab-item" data-chart="size">Size Trend</div>
-                    <div class="tab-item" data-chart="parity">Parity Trend</div>
+                    <div class="tab-item" data-chart="size">Big/Small Trend</div>
+                    <div class="tab-item" data-chart="parity">Odd/Even Trend</div>
                     <div class="tab-item" data-chart="color">Color Trend</div>
                 </div>
-
                 <!-- Trend Chart Container -->
                 <div class="trend-chart-container">
                     <!-- Number Trend Chart -->
@@ -480,90 +465,87 @@
                         <div class="chart-header">
                             <h3>Number Trend Chart</h3>
                             <div class="chart-controls">
-                                <select class="period-select" id="numberPeriodSelect">
+                                <select class="period-select">
                                     <option value="20">Last 20 Periods</option>
                                     <option value="50" selected>Last 50 Periods</option>
                                     <option value="100">Last 100 Periods</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="number-trend-grid" id="numberTrendGrid">
-                            <!-- Dynamic content will be generated here -->
+                        <div class="number-trend-grid">
+                            <!-- Dynamic Content -->
                         </div>
                         <div class="trend-legend">
                             <div class="legend-item">
                                 <span class="legend-dot recent"></span>
-                                <span>Recent 5 Periods</span>
+                                <span>Last 5 Periods</span>
                             </div>
                             <div class="legend-item">
                                 <span class="legend-dot hot"></span>
-                                <span>Hot Numbers</span>
+                                <span>Hot Number</span>
                             </div>
                             <div class="legend-item">
                                 <span class="legend-dot cold"></span>
-                                <span>Cold Numbers</span>
+                                <span>Cold Number</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Size Trend Chart -->
+                    <!-- Big/Small Trend Chart -->
                     <div class="trend-chart" id="size-chart">
                         <div class="chart-header">
-                            <h3>Size Trend Chart</h3>
+                            <h3>Big/Small Trend Chart</h3>
                             <div class="chart-info">
                                 <span class="info-text">Big: 5-9, Small: 0-4</span>
                             </div>
                         </div>
                         <div class="pattern-trend-container">
                             <div class="trend-line" id="size-trend-line">
-                                <!-- Dynamic content will be generated here -->
+                                <!-- Dynamic Content -->
                             </div>
                         </div>
                         <div class="pattern-stats">
                             <div class="stat-item">
-                                <span class="stat-label">Big Rate</span>
+                                <span class="stat-label">Big Number Rate</span>
                                 <span class="stat-value" id="big-rate">0%</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Small Rate</span>
+                                <span class="stat-label">Small Number Rate</span>
                                 <span class="stat-value" id="small-rate">0%</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Current Consecutive</span>
+                                <span class="stat-label">Current Streak</span>
                                 <span class="stat-value" id="size-streak">0</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Parity Trend Chart -->
+                    <!-- Odd/Even Trend Chart -->
                     <div class="trend-chart" id="parity-chart">
                         <div class="chart-header">
-                            <h3>Parity Trend Chart</h3>
+                            <h3>Odd/Even Trend Chart</h3>
                             <div class="chart-info">
                                 <span class="info-text">Odd: 1,3,5,7,9, Even: 0,2,4,6,8</span>
                             </div>
                         </div>
                         <div class="pattern-trend-container">
                             <div class="trend-line" id="parity-trend-line">
-                                <!-- Dynamic content will be generated here -->
+                                <!-- Dynamic Content -->
                             </div>
                         </div>
                         <div class="pattern-stats">
                             <div class="stat-item">
-                                <span class="stat-label">Odd Rate</span>
+                                <span class="stat-label">Odd Number Rate</span>
                                 <span class="stat-value" id="odd-rate">0%</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Even Rate</span>
+                                <span class="stat-label">Even Number Rate</span>
                                 <span class="stat-value" id="even-rate">0%</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Current Consecutive</span>
+                                <span class="stat-label">Current Streak</span>
                                 <span class="stat-value" id="parity-streak">0</span>
                             </div>
                         </div>
                     </div>
-
                     <!-- Color Trend Chart -->
                     <div class="trend-chart" id="color-chart">
                         <div class="chart-header">
@@ -573,39 +555,38 @@
                             </div>
                         </div>
                         <div class="color-trend-container">
-                            <div class="color-trend-grid" id="colorTrendGrid">
-                                <!-- Dynamic content will be generated here -->
+                            <div class="color-trend-grid">
+                                <!-- Dynamic Content -->
                             </div>
                         </div>
                         <div class="color-stats">
                             <div class="stat-item">
-                                <span class="stat-label">Red Rate</span>
+                                <span class="stat-label">Red Number Rate</span>
                                 <span class="stat-value" id="red-rate">0%</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Green Rate</span>
+                                <span class="stat-label">Green Number Rate</span>
                                 <span class="stat-value" id="green-rate">0%</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-label">Purple Rate</span>
+                                <span class="stat-label">Purple Number Rate</span>
                                 <span class="stat-value" id="purple-rate">0%</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Trend Analysis Card -->
                 <div class="trend-analysis-card">
                     <div class="card-header">
                         <h3>Trend Analysis</h3>
-                        <button class="analysis-refresh-btn" id="trendAnalysisRefreshBtn">
-                            <i class="fas fa-redo"></i>
+                        <button class="analysis-refresh-btn">
+                            <span class="material-icons-round">refresh</span>
                         </button>
                     </div>
                     <div class="analysis-content">
                         <div class="analysis-item">
                             <div class="analysis-icon">
-                                <i class="fas fa-fire"></i>
+                                <span class="material-icons-round">trending_up</span>
                             </div>
                             <div class="analysis-text">
                                 <div class="analysis-title">Hot Number Alert</div>
@@ -614,7 +595,7 @@
                         </div>
                         <div class="analysis-item">
                             <div class="analysis-icon">
-                                <i class="fas fa-snowflake"></i>
+                                <span class="material-icons-round">trending_down</span>
                             </div>
                             <div class="analysis-text">
                                 <div class="analysis-title">Cold Number Analysis</div>
@@ -623,7 +604,7 @@
                         </div>
                         <div class="analysis-item">
                             <div class="analysis-icon">
-                                <i class="fas fa-chart-bar"></i>
+                                <span class="material-icons-round">insights</span>
                             </div>
                             <div class="analysis-text">
                                 <div class="analysis-title">Pattern Prediction</div>
@@ -632,56 +613,52 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Missing Data -->
                 <div class="missing-data-card">
                     <div class="card-header">
                         <h3>Missing Data</h3>
                         <div class="missing-tabs">
-                            <span class="missing-tab active" data-type="number">Numbers</span>
-                            <span class="missing-tab" data-type="pattern">Patterns</span>
+                            <span class="missing-tab active" data-type="number">Number</span>
+                            <span class="missing-tab" data-type="pattern">Pattern</span>
                         </div>
                     </div>
                     <div class="missing-content">
                         <div class="missing-grid" id="number-missing">
-                            <!-- Dynamic content will be generated here -->
+                            <!-- Dynamic Content -->
                         </div>
                         <div class="missing-grid hidden" id="pattern-missing">
-                            <!-- Dynamic content will be generated here -->
+                            <!-- Dynamic Content -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Pattern Page -->
         <div class="page" id="pattern">
             <header class="page-header">
                 <div class="header-content">
-                    <button class="back-btn" id="backBtnPattern">
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
                     </button>
-                    <h1>Road Analysis</h1>
-                    <button class="header-btn pattern-filter-btn" id="patternFilterBtn">
-                        <i class="fas fa-filter"></i>
+                    <h1>Pattern Analysis</h1>
+                    <button class="header-btn pattern-filter-btn">
+                        <span class="material-icons-round">filter_list</span>
                     </button>
                 </div>
             </header>
             <div class="page-content">
                 <!-- Pattern Type Toggle -->
                 <div class="pattern-tabs">
-                    <div class="pattern-tab active" data-pattern="size">Size Road</div>
-                    <div class="pattern-tab" data-pattern="parity">Parity Road</div>
-                    <div class="pattern-tab" data-pattern="color">Color Road</div>
-                    <div class="pattern-tab" data-pattern="comprehensive">Comprehensive Road</div>
+                    <div class="pattern-tab active" data-pattern="size">Big/Small Pattern</div>
+                    <div class="pattern-tab" data-pattern="parity">Odd/Even Pattern</div>
+                    <div class="pattern-tab" data-pattern="color">Color Pattern</div>
+                    <div class="pattern-tab" data-pattern="comprehensive">Comprehensive Pattern</div>
                 </div>
-
                 <!-- Pattern Chart Container -->
                 <div class="pattern-chart-container">
-                    <!-- Size Road -->
+                    <!-- Big/Small Pattern -->
                     <div class="pattern-chart active" id="size-pattern">
                         <div class="pattern-header">
-                            <h3>Size Road</h3>
+                            <h3>Big/Small Pattern</h3>
                             <div class="pattern-info">
                                 <span class="info-badge">Big: 5-9</span>
                                 <span class="info-badge">Small: 0-4</span>
@@ -689,16 +666,16 @@
                         </div>
                         <div class="pattern-road-container">
                             <div class="road-grid" id="size-road-grid">
-                                <!-- Dynamic road will be generated here -->
+                                <!-- Dynamic Pattern Generation -->
                             </div>
                         </div>
                         <div class="pattern-summary">
                             <div class="summary-item">
-                                <span class="summary-label">Big Consecutive</span>
+                                <span class="summary-label">Big Streak</span>
                                 <span class="summary-value" id="big-streak">0</span>
                             </div>
                             <div class="summary-item">
-                                <span class="summary-label">Small Consecutive</span>
+                                <span class="summary-label">Small Streak</span>
                                 <span class="summary-value" id="small-streak">0</span>
                             </div>
                             <div class="summary-item">
@@ -707,11 +684,10 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Parity Road -->
+                    <!-- Odd/Even Pattern -->
                     <div class="pattern-chart" id="parity-pattern">
                         <div class="pattern-header">
-                            <h3>Parity Road</h3>
+                            <h3>Odd/Even Pattern</h3>
                             <div class="pattern-info">
                                 <span class="info-badge">Odd: 1,3,5,7,9</span>
                                 <span class="info-badge">Even: 0,2,4,6,8</span>
@@ -719,16 +695,16 @@
                         </div>
                         <div class="pattern-road-container">
                             <div class="road-grid" id="parity-road-grid">
-                                <!-- Dynamic road will be generated here -->
+                                <!-- Dynamic Pattern Generation -->
                             </div>
                         </div>
                         <div class="pattern-summary">
                             <div class="summary-item">
-                                <span class="summary-label">Odd Consecutive</span>
+                                <span class="summary-label">Odd Streak</span>
                                 <span class="summary-value" id="odd-streak">0</span>
                             </div>
                             <div class="summary-item">
-                                <span class="summary-label">Even Consecutive</span>
+                                <span class="summary-label">Even Streak</span>
                                 <span class="summary-value" id="even-streak">0</span>
                             </div>
                             <div class="summary-item">
@@ -737,11 +713,10 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Color Road -->
+                    <!-- Color Pattern -->
                     <div class="pattern-chart" id="color-pattern">
                         <div class="pattern-header">
-                            <h3>Color Road</h3>
+                            <h3>Color Pattern</h3>
                             <div class="pattern-info">
                                 <span class="info-badge red">Red: 1,3,7,9</span>
                                 <span class="info-badge green">Green: 2,4,6,8</span>
@@ -750,31 +725,30 @@
                         </div>
                         <div class="pattern-road-container">
                             <div class="road-grid color-road" id="color-road-grid">
-                                <!-- Dynamic road will be generated here -->
+                                <!-- Dynamic Pattern Generation -->
                             </div>
                         </div>
                         <div class="pattern-summary">
                             <div class="summary-item">
-                                <span class="summary-label">Red Consecutive</span>
+                                <span class="summary-label">Red Streak</span>
                                 <span class="summary-value" id="red-streak">0</span>
                             </div>
                             <div class="summary-item">
-                                <span class="summary-label">Green Consecutive</span>
+                                <span class="summary-label">Green Streak</span>
                                 <span class="summary-value" id="green-streak">0</span>
                             </div>
                             <div class="summary-item">
-                                <span class="summary-label">Purple Consecutive</span>
+                                <span class="summary-label">Purple Streak</span>
                                 <span class="summary-value" id="purple-streak">0</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Comprehensive Road -->
+                    <!-- Comprehensive Pattern -->
                     <div class="pattern-chart" id="comprehensive-pattern">
                         <div class="pattern-header">
-                            <h3>Comprehensive Road Analysis</h3>
+                            <h3>Comprehensive Pattern Analysis</h3>
                             <div class="pattern-controls">
-                                <select class="road-period-select" id="roadPeriodSelect">
+                                <select class="road-period-select">
                                     <option value="30">Last 30 Periods</option>
                                     <option value="50" selected>Last 50 Periods</option>
                                     <option value="100">Last 100 Periods</option>
@@ -783,33 +757,32 @@
                         </div>
                         <div class="comprehensive-grid">
                             <div class="mini-road">
-                                <h4>Size Road</h4>
+                                <h4>Big/Small Pattern</h4>
                                 <div class="mini-road-display" id="mini-size-road"></div>
                             </div>
                             <div class="mini-road">
-                                <h4>Parity Road</h4>
+                                <h4>Odd/Even Pattern</h4>
                                 <div class="mini-road-display" id="mini-parity-road"></div>
                             </div>
                             <div class="mini-road">
-                                <h4>Color Road</h4>
+                                <h4>Color Pattern</h4>
                                 <div class="mini-road-display" id="mini-color-road"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Pattern Analysis Card -->
                 <div class="pattern-analysis-card">
                     <div class="card-header">
-                        <h3>Road Analysis</h3>
-                        <button class="pattern-refresh-btn" id="patternRefreshBtn">
-                            <i class="fas fa-redo"></i>
+                        <h3>Pattern Analysis</h3>
+                        <button class="pattern-refresh-btn">
+                            <span class="material-icons-round">refresh</span>
                         </button>
                     </div>
                     <div class="analysis-grid">
                         <div class="analysis-card">
                             <div class="analysis-icon">
-                                <i class="fas fa-chart-bar"></i>
+                                <span class="material-icons-round">insights</span>
                             </div>
                             <div class="analysis-content">
                                 <div class="analysis-title">Current Pattern</div>
@@ -818,16 +791,16 @@
                         </div>
                         <div class="analysis-card">
                             <div class="analysis-icon">
-                                <i class="fas fa-trend-up"></i>
+                                <span class="material-icons-round">trending_up</span>
                             </div>
                             <div class="analysis-content">
-                                <div class="analysis-title">Road Trend</div>
+                                <div class="analysis-title">Pattern Trend</div>
                                 <div class="analysis-value" id="pattern-trend">Analyzing...</div>
                             </div>
                         </div>
                         <div class="analysis-card">
                             <div class="analysis-icon">
-                                <i class="fas fa-lightbulb"></i>
+                                <span class="material-icons-round">psychology</span>
                             </div>
                             <div class="analysis-content">
                                 <div class="analysis-title">Prediction Suggestion</div>
@@ -836,11 +809,10 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Pattern Statistics -->
                 <div class="pattern-stats-card">
                     <div class="card-header">
-                        <h3>Road Statistics</h3>
+                        <h3>Pattern Statistics</h3>
                         <div class="stats-period">
                             <span>Last 50 Periods</span>
                         </div>
@@ -848,19 +820,19 @@
                     <div class="stats-content">
                         <div class="stats-table">
                             <div class="stats-row">
-                                <span class="stats-label">Size Road Jump Count</span>
+                                <span class="stats-label">Big/Small Jump Count</span>
                                 <span class="stats-value" id="size-total-jumps">0</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-label">Parity Road Jump Count</span>
+                                <span class="stats-label">Odd/Even Jump Count</span>
                                 <span class="stats-value" id="parity-total-jumps">0</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-label">Color Road Jump Count</span>
+                                <span class="stats-label">Color Jump Count</span>
                                 <span class="stats-value" id="color-total-jumps">0</span>
                             </div>
                             <div class="stats-row">
-                                <span class="stats-label">Longest Consecutive</span>
+                                <span class="stats-label">Longest Streak</span>
                                 <span class="stats-value" id="max-streak">0</span>
                             </div>
                             <div class="stats-row">
@@ -870,11 +842,10 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Pattern Prediction -->
                 <div class="pattern-prediction-card">
                     <div class="card-header">
-                        <h3>Next Period Road Prediction</h3>
+                        <h3>Next Period Pattern Prediction</h3>
                         <div class="prediction-confidence">
                             <span class="confidence-label">Confidence</span>
                             <span class="confidence-value" id="prediction-confidence">0%</span>
@@ -882,7 +853,7 @@
                     </div>
                     <div class="prediction-content">
                         <div class="prediction-item">
-                            <div class="prediction-type">Size Prediction</div>
+                            <div class="prediction-type">Big/Small Prediction</div>
                             <div class="prediction-result" id="size-prediction">
                                 <span class="prediction-choice active">Big</span>
                                 <span class="prediction-choice">Small</span>
@@ -890,7 +861,7 @@
                             <div class="prediction-prob" id="size-prob">78%</div>
                         </div>
                         <div class="prediction-item">
-                            <div class="prediction-type">Parity Prediction</div>
+                            <div class="prediction-type">Odd/Even Prediction</div>
                             <div class="prediction-result" id="parity-prediction">
                                 <span class="prediction-choice">Odd</span>
                                 <span class="prediction-choice active">Even</span>
@@ -910,108 +881,105 @@
                 </div>
             </div>
         </div>
-
-        <!-- Strategy Page -->
         <div class="page" id="strategy">
             <header class="page-header">
                 <div class="header-content">
-                    <button class="back-btn" id="backBtnStrategy">
-                        <i class="fas fa-arrow-left"></i>
+                    <button class="back-btn">
+                        <span class="material-icons-round">arrow_back</span>
                     </button>
                     <h1>Betting Strategy</h1>
-                    <button class="header-btn strategy-settings-btn" id="strategySettingsBtn">
-                        <i class="fas fa-sliders-h"></i>
+                    <button class="header-btn strategy-settings-btn">
+                        <span class="material-icons-round">tune</span>
                     </button>
                 </div>
             </header>
             <div class="page-content">
-                <!-- Strategy Type Selector -->
+                <!-- Strategy Type Selection -->
                 <div class="strategy-selector-card">
                     <div class="card-header">
                         <h3>Select Strategy</h3>
                         <div class="strategy-status">
                             <span class="status-dot active"></span>
-                            <span>AI Recommended</span>
+                            <span>Smart Recommendation</span>
                         </div>
                     </div>
                     <div class="strategy-grid">
                         <div class="strategy-item active" data-strategy="ai">
                             <div class="strategy-icon">
-                                <i class="fas fa-brain"></i>
+                                <span class="material-icons-round">auto_awesome</span>
                             </div>
                             <div class="strategy-info">
-                                <div class="strategy-name">AI Strategy</div>
+                                <div class="strategy-name">AI Smart</div>
                                 <div class="strategy-desc">Machine Learning Prediction</div>
                                 <div class="strategy-rate">Win Rate: 78%</div>
                             </div>
                         </div>
                         <div class="strategy-item" data-strategy="follow">
                             <div class="strategy-icon">
-                                <i class="fas fa-trend-up"></i>
+                                <span class="material-icons-round">trending_up</span>
                             </div>
                             <div class="strategy-info">
-                                <div class="strategy-name">Follow Trend Strategy</div>
+                                <div class="strategy-name">Follow Trend</div>
                                 <div class="strategy-desc">Follow Hot Trends</div>
                                 <div class="strategy-rate">Win Rate: 65%</div>
                             </div>
                         </div>
                         <div class="strategy-item" data-strategy="reverse">
                             <div class="strategy-icon">
-                                <i class="fas fa-trend-down"></i>
+                                <span class="material-icons-round">trending_down</span>
                             </div>
                             <div class="strategy-info">
-                                <div class="strategy-name">Reverse Trend Strategy</div>
-                                <div class="strategy-desc">Bet Against Cold Trends</div>
+                                <div class="strategy-name">Reverse Trend</div>
+                                <div class="strategy-desc">Reverse Bet Cold Trends</div>
                                 <div class="strategy-rate">Win Rate: 58%</div>
                             </div>
                         </div>
                         <div class="strategy-item" data-strategy="martin">
                             <div class="strategy-icon">
-                                <i class="fas fa-landmark"></i>
+                                <span class="material-icons-round">account_balance</span>
                             </div>
                             <div class="strategy-info">
-                                <div class="strategy-name">Martingale Strategy</div>
+                                <div class="strategy-name">Martingale</div>
                                 <div class="strategy-desc">Progressive Betting</div>
                                 <div class="strategy-rate">Win Rate: 72%</div>
                             </div>
                         </div>
                         <div class="strategy-item" data-strategy="flat">
                             <div class="strategy-icon">
-                                <i class="fas fa-equals"></i>
+                                <span class="material-icons-round">horizontal_rule</span>
                             </div>
                             <div class="strategy-info">
-                                <div class="strategy-name">Flat Betting Strategy</div>
+                                <div class="strategy-name">Flat Betting</div>
                                 <div class="strategy-desc">Fixed Amount Betting</div>
                                 <div class="strategy-rate">Win Rate: 52%</div>
                             </div>
                         </div>
                         <div class="strategy-item" data-strategy="wave">
                             <div class="strategy-icon">
-                                <i class="fas fa-wave-square"></i>
+                                <span class="material-icons-round">waves</span>
                             </div>
                             <div class="strategy-info">
-                                <div class="strategy-name">Wave Strategy</div>
-                                <div class="strategy-desc">Wave Pattern Betting</div>
+                                <div class="strategy-name">Wave Betting</div>
+                                <div class="strategy-desc">Wave Style Betting</div>
                                 <div class="strategy-rate">Win Rate: 68%</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Current Strategy Details -->
                 <div class="current-strategy-card">
                     <div class="card-header">
-                        <h3 id="current-strategy-name">AI Strategy</h3>
+                        <h3 id="current-strategy-name">AI Smart Strategy</h3>
                         <div class="strategy-actions">
                             <button class="action-btn-sm" id="strategy-backtest-btn">
-                                <i class="fas fa-history"></i>
+                                <span class="material-icons-round">history</span>
                                 Backtest
                             </button>
                         </div>
                     </div>
                     <div class="strategy-details">
                         <div class="strategy-description" id="strategy-description">
-                            Based on machine learning algorithms, analyzes historical data and real-time trends, intelligently recommends optimal betting plans. Considers multiple dimensions including number heat, road patterns, pattern analysis, etc.
+                            Based on machine learning algorithms, analyze historical data and real-time trends, intelligently recommend optimal betting solutions. Comprehensive consideration of number heat, pattern rules, pattern analysis and other multi-dimensional factors.
                         </div>
                         <div class="strategy-params">
                             <div class="param-group">
@@ -1027,29 +995,28 @@
                             <div class="param-group">
                                 <label>Profit Target</label>
                                 <select class="param-select" id="profit-target">
-                                    <option value="100">¥100</option>
-                                    <option value="200" selected>¥200</option>
-                                    <option value="500">¥500</option>
-                                    <option value="1000">¥1000</option>
+                                    <option value="100">100</option>
+                                    <option value="200" selected>200</option>
+                                    <option value="500">500</option>
+                                    <option value="1000">1000</option>
                                 </select>
                             </div>
                             <div class="param-group">
                                 <label>Stop Loss</label>
                                 <select class="param-select" id="stop-loss">
-                                    <option value="100">¥100</option>
-                                    <option value="200" selected>¥200</option>
-                                    <option value="300">¥300</option>
-                                    <option value="500">¥500</option>
+                                    <option value="100">100</option>
+                                    <option value="200" selected>200</option>
+                                    <option value="300">300</option>
+                                    <option value="500">500</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Real-time Betting Recommendations -->
+                <!-- Real-time Betting Suggestions -->
                 <div class="recommendation-card">
                     <div class="card-header">
-                        <h3>Real-time Betting Recommendations</h3>
+                        <h3>Real-time Betting Suggestions</h3>
                         <div class="recommendation-confidence">
                             <span class="confidence-label">Confidence</span>
                             <span class="confidence-value" id="recommendation-confidence">84%</span>
@@ -1072,18 +1039,17 @@
                             </div>
                             <div class="recommendation-amount">
                                 <span class="amount-label">Suggested Amount:</span>
-                                <span class="amount-value" id="recommendation-amount">¥50</span>
+                                <span class="amount-value" id="recommendation-amount">50</span>
                             </div>
                         </div>
                         <div class="recommendation-reason">
                             <div class="reason-title">Recommendation Reason</div>
                             <div class="reason-text" id="recommendation-reason">
-                                Based on AI analysis, number 7 has been active recently, big odd pattern has appeared for 3 consecutive periods, probability of continuing this trend next period is high.
+                                Based on AI analysis, number 7 has been active recently, Big/Odd pattern has appeared for 3 consecutive periods, predicting high probability of continuing this trend in next period.
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- Strategy Statistics -->
                 <div class="strategy-stats-card">
                     <div class="card-header">
@@ -1097,8 +1063,8 @@
                     <div class="stats-content">
                         <div class="stats-overview">
                             <div class="stat-item">
-                                <div class="stat-value profit" id="total-profit">+¥248</div>
-                                <div class="stat-label">Total P/L</div>
+                                <div class="stat-value profit" id="total-profit">+248</div>
+                                <div class="stat-label">Total Profit/Loss</div>
                             </div>
                             <div class="stat-item">
                                 <div class="stat-value" id="win-rate">72%</div>
@@ -1115,29 +1081,27 @@
                         </div>
                         <div class="profit-chart">
                             <div class="chart-header">
-                                <span>P/L Trend</span>
+                                <span>Profit/Loss Trend</span>
                             </div>
                             <div class="chart-container" id="profit-chart">
-                                <!-- Dynamic chart will be generated here -->
+                                <!-- Dynamic Chart Generation -->
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Betting History -->
+                <!-- Betting Records -->
                 <div class="bet-history-card">
                     <div class="card-header">
-                        <h3>Betting History</h3>
+                        <h3>Betting Records</h3>
                         <button class="action-btn-sm" id="clear-history-btn">
-                            <i class="fas fa-trash"></i>
+                            <span class="material-icons-round">delete</span>
                             Clear
                         </button>
                     </div>
                     <div class="bet-history-list" id="bet-history-list">
-                        <!-- Dynamic betting history will be generated here -->
+                        <!-- Dynamic Betting Records Generation -->
                     </div>
                 </div>
-
                 <!-- Strategy Backtest Modal -->
                 <div class="strategy-modal hidden" id="backtest-modal">
                     <div class="modal-overlay"></div>
@@ -1145,7 +1109,7 @@
                         <div class="modal-header">
                             <h3>Strategy Backtest</h3>
                             <button class="modal-close" id="close-backtest-modal">
-                                <i class="fas fa-times"></i>
+                                <span class="material-icons-round">close</span>
                             </button>
                         </div>
                         <div class="modal-body">
@@ -1169,11 +1133,11 @@
                             <div class="backtest-results hidden" id="backtest-results">
                                 <div class="results-summary">
                                     <div class="result-item">
-                                        <span class="result-label">Total Return</span>
+                                        <span class="result-label">Total Return Rate</span>
                                         <span class="result-value" id="backtest-return">+24.8%</span>
                                     </div>
                                     <div class="result-item">
-                                        <span class="result-label">Max Drawdown</span>
+                                        <span class="result-label">Maximum Drawdown</span>
                                         <span class="result-value" id="backtest-drawdown">-8.2%</span>
                                     </div>
                                     <div class="result-item">
@@ -1188,7 +1152,7 @@
                                 <div class="backtest-chart">
                                     <div class="chart-title">Capital Curve</div>
                                     <div class="chart-display" id="backtest-chart">
-                                        <!-- Backtest chart -->
+                                        <!-- Backtest Chart -->
                                     </div>
                                 </div>
                             </div>
@@ -1197,119 +1161,34 @@
                 </div>
             </div>
         </div>
-
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <div class="nav-item active" data-page="home">
-                <i class="fas fa-home"></i>
+                <span class="material-icons-round">home</span>
                 <span>Home</span>
             </div>
             <div class="nav-item" data-page="predict">
-                <i class="fas fa-brain"></i>
+                <span class="material-icons-round">auto_awesome</span>
                 <span>Prediction</span>
             </div>
             <div class="nav-item" data-page="trend">
-                <i class="fas fa-chart-line"></i>
+                <span class="material-icons-round">trending_up</span>
                 <span>Trend</span>
             </div>
             <div class="nav-item" data-page="pattern">
-                <i class="fas fa-border-all"></i>
-                <span>Road</span>
+                <span class="material-icons-round">grid_view</span>
+                <span>Pattern</span>
             </div>
             <div class="nav-item" data-page="strategy">
-                <i class="fas fa-chess-knight"></i>
+                <span class="material-icons-round">military_tech</span>
                 <span>Strategy</span>
             </div>
         </nav>
-
         <!-- Quick Preview Button -->
-        <button class="quick-preview-btn" id="quickPreviewBtn">
-            <i class="fas fa-eye"></i>
+        <button class="quick-preview-btn">
+            <span class="material-icons-round">visibility</span>
         </button>
     </div>
-
-    <!-- Notification Panel -->
-    <div class="notification-panel hidden" id="notificationPanel">
-        <div class="notification-header">
-            <h3>Notifications</h3>
-            <button class="close-notifications" id="closeNotificationsBtn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="notification-list">
-            <!-- Notifications will be dynamically added here -->
-        </div>
-    </div>
-
-    <!-- Settings Panel -->
-    <div class="settings-panel hidden" id="settingsPanel">
-        <div class="settings-header">
-            <h3>Settings</h3>
-            <button class="close-settings" id="closeSettingsBtn">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="settings-content">
-            <div class="setting-group">
-                <h4>Display Settings</h4>
-                <div class="setting-item">
-                    <span>Theme</span>
-                    <select id="themeSelect">
-                        <option value="light">Light</option>
-                        <option value="dark" selected>Dark</option>
-                        <option value="auto">Auto</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <span>Language</span>
-                    <select id="languageSelect">
-                        <option value="en" selected>English</option>
-                        <option value="zh">Chinese</option>
-                    </select>
-                </div>
-            </div>
-            <div class="setting-group">
-                <h4>Data Settings</h4>
-                <div class="setting-item">
-                    <span>Auto Refresh</span>
-                    <label class="switch">
-                        <input type="checkbox" id="autoRefreshToggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <span>Refresh Interval</span>
-                    <select id="refreshIntervalSelect">
-                        <option value="30">30 Seconds</option>
-                        <option value="60" selected>1 Minute</option>
-                        <option value="300">5 Minutes</option>
-                    </select>
-                </div>
-            </div>
-            <div class="setting-group">
-                <h4>Notification Settings</h4>
-                <div class="setting-item">
-                    <span>Sound Alerts</span>
-                    <label class="switch">
-                        <input type="checkbox" id="soundAlertsToggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <span>Vibration Alerts</span>
-                    <label class="switch">
-                        <input type="checkbox" id="vibrationAlertsToggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="setting-actions">
-                <button class="action-btn secondary" id="saveSettingsBtn">Save Settings</button>
-                <button class="action-btn primary" id="resetSettingsBtn">Reset to Default</button>
-            </div>
-        </div>
-    </div>
-
     <script src="script.js"></script>
 </body>
 </html>
