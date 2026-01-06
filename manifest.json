@@ -1,7 +1,7 @@
 {
   "name": "Wingo Lottery Analysis Assistant",
   "short_name": "Wingo Analysis",
-  "description": "Professional lottery prediction analysis tool providing intelligent predictions, trend analysis, pattern analysis, and more",
+  "description": "Professional lottery prediction analysis tool, providing intelligent prediction, trend analysis, pattern analysis and other functions",
   "version": "1.0.0",
   "start_url": "/",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "theme_color": "#407bff",
   "background_color": "#ffffff",
   "categories": ["entertainment", "utilities"],
-  "lang": "en-US",
+  "lang": "en",
   "scope": "/",
   "icons": [
     {
@@ -55,9 +55,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Smart Prediction",
+      "name": "AI Prediction",
       "short_name": "Prediction",
-      "description": "Quick access to intelligent prediction function",
+      "description": "Quick access to AI prediction function",
       "url": "/?page=predict",
       "icons": [
         {
