@@ -1,11 +1,13 @@
 // Wingo Lottery Analysis Assistant - Main Script File
 
-// API Service Class - Get real draw data
+// API Service Class - Get Real Draw Data
 class ApiService {
     constructor() {
-        this.baseUrl = 'http://localhost:3001/api';
+        this.baseUrl = 'https://api.example.com/history'; // Replace with actual URL
         this.cache = new Map();
         this.cacheTimeout = 60000; // 1 minute cache
+        this.lastPeriodNumber = null;
+        this.storageKey = 'wingo_history_data';
     }
 
     // Get historical draw data
@@ -20,12 +22,12 @@ class ApiService {
         try {
             console.log('Fetching historical draw data...');
             const timestamp = Date.now();
-            const url = `${this.baseUrl}/GetHistoryIssuePage.json?ts=${timestamp}`;
+            const url = `${this.baseUrl}/draw_history.json?ts=${timestamp}`;
             
             // Try multiple request methods
             const response = await this.fetchWithFallback(url);
             const data = await response.json();
-            console.log('API returned data:', data);
+            console.log('API response data:', data);
 
             // Process API data format
             const processedData = this.processHistoryData(data);
@@ -39,12 +41,12 @@ class ApiService {
             return processedData;
         } catch (error) {
             console.error('Failed to fetch historical data:', error);
-            // Return mock data as fallback
+            // Return simulated data as backup
             return this.getFallbackData();
         }
     }
 
-    // Multiple methods to fetch data
+    // Multiple request methods
     async fetchWithFallback(url) {
         const methods = [
             () => fetch(url, { method: 'GET', mode: 'cors' }),
@@ -59,7 +61,7 @@ class ApiService {
                     return response;
                 }
             } catch (error) {
-                console.warn('Request method failed, trying next one:', error.message);
+                console.warn('Request method failed, trying next:', error.message);
             }
         }
 
@@ -71,24 +73,16 @@ class ApiService {
         try {
             const historyList = [];
             
-            // Process data according to actual API return format
-            if (apiData && apiData.data && Array.isArray(apiData.data)) {
-                apiData.data.forEach((item, index) => {
-                    const processedItem = this.processHistoryItem(item, index);
-                    if (processedItem) {
-                        historyList.push(processedItem);
-                    }
-                });
-            } else if (apiData && Array.isArray(apiData)) {
-                // If directly returning array
-                apiData.forEach((item, index) => {
+            // Process data based on actual API response format
+            if (apiData && apiData.data && apiData.data.list && Array.isArray(apiData.data.list)) {
+                apiData.data.list.forEach((item, index) => {
                     const processedItem = this.processHistoryItem(item, index);
                     if (processedItem) {
                         historyList.push(processedItem);
                     }
                 });
             } else {
-                console.warn('API data format not as expected, using fallback data');
+                console.warn('API data format unexpected, using backup data');
                 return this.getFallbackData();
             }
 
@@ -100,29 +94,33 @@ class ApiService {
         }
     }
 
-    // Process single historical record item
+    // Process single historical record
     processHistoryItem(item, index) {
         try {
-            // Try multiple possible field names
-            const period = item.period || item.issueNo || item.issue || item.id || `2024${String(1000 + index).slice(-4)}`;
+            const period = item.issueNumber || item.id || `2025${String(1000 + index).slice(-4)}`;
             const number = this.extractNumber(item);
             const time = this.extractTime(item, index);
-
-            if (number === null) {
-                return null;
-            }
+            
+            // Get color based on game rules
+            const color = this.getNumberColor(number);
+            
+            // Check if big/small based on rules
+            const big = number >= 5; // 0-4: Small, 5-9: Big
+            
+            // Check if odd/even
+            const odd = number % 2 === 1;
 
             return {
                 period: String(period),
                 time: time,
                 number: number,
-                big: number >= 5,
-                odd: number % 2 === 1,
-                color: this.getNumberColor(number),
-                patterns: this.generatePatterns(number)
+                big: big,
+                odd: odd,
+                color: color,
+                patterns: this.generatePatterns(number, color)
             };
         } catch (error) {
-            console.error('Error processing single historical record:', error);
+            console.error('Error processing single history record:', error);
             return null;
         }
     }
@@ -141,7 +139,7 @@ class ApiService {
             }
         }
 
-        // Try to find number from entire object
+        // Try to find number in entire object
         const allValues = Object.values(item);
         for (const value of allValues) {
             if (typeof value === 'number' && value >= 0 && value <= 9) {
@@ -155,7 +153,7 @@ class ApiService {
             }
         }
 
-        // Generate random number as last resort
+        // Generate random number as last backup
         return Math.floor(Math.random() * 10);
     }
 
@@ -172,29 +170,49 @@ class ApiService {
             }
         }
 
-        // If no time field, generate a reasonable time
-        return new Date(Date.now() - index * 5 * 60 * 1000); // Every 5 minutes per issue
+        // If no time field, generate reasonable time
+        return new Date(Date.now() - index * 5 * 60 * 1000); // Every 5 minutes
     }
 
-    // Get number color
+    // Get number color based on game rules
     getNumberColor(number) {
-        if ([1, 3, 7, 9].includes(number)) return 'red';
-        if ([2, 4, 6, 8].includes(number)) return 'green';
-        if ([0, 5].includes(number)) return 'purple';
-        return 'red';
+        // Game rules:
+        // 0: Small, Red/Violet
+        // 1: Small, Green
+        // 2: Small, Red
+        // 3: Small, Green
+        // 4: Small, Red
+        // 5: Big, Green/Violet
+        // 6: Big, Red
+        // 7: Big, Green
+        // 8: Big, Red
+        // 9: Big, Green
+        
+        if (number === 0) return 'purple'; // Red/Violet
+        if (number === 1) return 'green';
+        if (number === 2) return 'red';
+        if (number === 3) return 'green';
+        if (number === 4) return 'red';
+        if (number === 5) return 'purple'; // Green/Violet
+        if (number === 6) return 'red';
+        if (number === 7) return 'green';
+        if (number === 8) return 'red';
+        if (number === 9) return 'green';
+        
+        return 'red'; // Default
     }
 
     // Generate number patterns
-    generatePatterns(number) {
+    generatePatterns(number, color) {
         const patterns = [];
         
-        if (number >= 5) patterns.push('Big');
-        else patterns.push('Small');
+        // Size pattern
+        patterns.push(number >= 5 ? 'Big' : 'Small');
         
-        if (number % 2 === 1) patterns.push('Odd');
-        else patterns.push('Even');
+        // Parity pattern
+        patterns.push(number % 2 === 1 ? 'Odd' : 'Even');
         
-        const color = this.getNumberColor(number);
+        // Color pattern
         if (color === 'red') patterns.push('Red');
         else if (color === 'green') patterns.push('Green');
         else if (color === 'purple') patterns.push('Purple');
@@ -202,34 +220,35 @@ class ApiService {
         return patterns;
     }
 
-    // Fallback data - used when API is unavailable
+    // Backup data - used when API unavailable
     getFallbackData() {
-        console.log('Using fallback mock data');
+        console.log('Using backup simulation data');
         const fallbackData = [];
         const now = new Date();
         
         for (let i = 0; i < 50; i++) {
             const number = Math.floor(Math.random() * 10);
             const time = new Date(now.getTime() - i * 5 * 60 * 1000);
+            const color = this.getNumberColor(number);
             
             fallbackData.push({
-                period: `2024${String(1000 + i)}`,
+                period: `2025${String(1000 + i)}`,
                 time: time,
                 number: number,
                 big: number >= 5,
                 odd: number % 2 === 1,
-                color: this.getNumberColor(number),
-                patterns: this.generatePatterns(number)
+                color: color,
+                patterns: this.generatePatterns(number, color)
             });
         }
         
         return fallbackData;
     }
 
-    // Get current issue information
+    // Get current period information
     getCurrentPeriodInfo() {
         const now = new Date();
-        const periodNumber = `2024${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(Math.floor(now.getMinutes() / 5) + 1).padStart(2, '0')}`;
+        const periodNumber = `2025${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(Math.floor(now.getMinutes() / 5) + 1).padStart(2, '0')}`;
         
         return {
             period: periodNumber,
@@ -259,6 +278,119 @@ class ApiService {
         
         return nextDraw;
     }
+
+    // Check for new data every 2 seconds
+    startDataPolling(callback) {
+        // Initial check
+        this.checkForNewData(callback);
+        
+        // Set interval for every 2 seconds
+        setInterval(() => {
+            this.checkForNewData(callback);
+        }, 2000);
+    }
+
+    // Check for new data
+    async checkForNewData(callback) {
+        try {
+            const newData = await this.getHistoryData();
+            if (newData && newData.length > 0) {
+                const latestPeriod = newData[0].period;
+                
+                // Check if this is new data
+                if (this.lastPeriodNumber !== latestPeriod) {
+                    this.lastPeriodNumber = latestPeriod;
+                    
+                    // Save to storage
+                    this.saveToStorage(newData);
+                    
+                    // Callback to update UI
+                    if (callback) {
+                        callback(newData);
+                    }
+                    
+                    console.log('New data arrived:', latestPeriod);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking for new data:', error);
+        }
+    }
+
+    // Save data to localStorage
+    saveToStorage(data) {
+        try {
+            // Get existing data
+            const existingData = this.getFromStorage() || [];
+            
+            // Combine and remove duplicates
+            const combinedData = [...data, ...existingData];
+            const uniqueData = this.removeDuplicates(combinedData);
+            
+            // Sort by period number (descending)
+            uniqueData.sort((a, b) => {
+                return b.period.localeCompare(a.period);
+            });
+            
+            // Keep only last 100 records
+            const trimmedData = uniqueData.slice(0, 100);
+            
+            // Save to localStorage
+            localStorage.setItem(this.storageKey, JSON.stringify(trimmedData));
+            
+            console.log('Data saved to storage:', trimmedData.length, 'records');
+        } catch (error) {
+            console.error('Error saving to storage:', error);
+        }
+    }
+
+    // Get data from localStorage
+    getFromStorage() {
+        try {
+            const data = localStorage.getItem(this.storageKey);
+            return data ? JSON.parse(data) : null;
+        } catch (error) {
+            console.error('Error getting from storage:', error);
+            return null;
+        }
+    }
+
+    // Remove duplicate records based on period number
+    removeDuplicates(data) {
+        const seen = new Set();
+        return data.filter(item => {
+            if (seen.has(item.period)) {
+                return false;
+            }
+            seen.add(item.period);
+            return true;
+        });
+    }
+
+    // Initial data load - get 10 records on first run
+    async initializeFirstLoad() {
+        try {
+            const data = await this.getHistoryData();
+            if (data && data.length > 0) {
+                // Take first 10 records
+                const initialData = data.slice(0, 10);
+                
+                // Save to storage
+                this.saveToStorage(initialData);
+                
+                // Set last period number
+                if (initialData.length > 0) {
+                    this.lastPeriodNumber = initialData[0].period;
+                }
+                
+                console.log('Initial data loaded:', initialData.length, 'records');
+                return initialData;
+            }
+        } catch (error) {
+            console.error('Error in initial data load:', error);
+            return this.getFallbackData().slice(0, 10);
+        }
+    }
 }
 
 // Application constants definition
@@ -278,13 +410,13 @@ const APP_CONSTANTS = {
         PAGES: '.page'
     },
     API: {
-        HISTORY_URL: 'http://localhost:3001/api/latest',
+        HISTORY_URL: 'https://api.example.com/history/draw_history.json',
         TIMEOUT: 10000,
         CACHE_DURATION: 60000
     },
     NUMBER_COLORS: {
-        RED: [1, 3, 7, 9],
-        GREEN: [2, 4, 6, 8],
+        RED: [2, 4, 6, 8],
+        GREEN: [1, 3, 7, 9],
         PURPLE: [0, 5]
     },
     DEFAULTS: {
@@ -297,7 +429,7 @@ const APP_CONSTANTS = {
 
 // Utility class - extract common functionality
 class AppUtils {
-    // DOM query optimization - cache frequently used elements
+    // DOM query optimization - cache common elements
     static elementCache = new Map();
     
     static getElement(selector, useCache = true) {
@@ -355,16 +487,24 @@ class AppUtils {
     static formatTime(date) {
         return date.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
-            minute: '2-digit' 
+            minute: '2-digit',
+            hour12: true
         });
     }
     
-    // Get number color
+    // Get number color based on game rules
     static getNumberColor(number) {
-        if (APP_CONSTANTS.NUMBER_COLORS.RED.includes(number)) return 'red';
-        if (APP_CONSTANTS.NUMBER_COLORS.GREEN.includes(number)) return 'green';
-        if (APP_CONSTANTS.NUMBER_COLORS.PURPLE.includes(number)) return 'purple';
-        return 'red'; // Default value
+        if (number === 0) return 'purple';
+        if (number === 1) return 'green';
+        if (number === 2) return 'red';
+        if (number === 3) return 'green';
+        if (number === 4) return 'red';
+        if (number === 5) return 'purple';
+        if (number === 6) return 'red';
+        if (number === 7) return 'green';
+        if (number === 8) return 'red';
+        if (number === 9) return 'green';
+        return 'red'; // Default
     }
     
     // Random integer generation
@@ -380,6 +520,31 @@ class AppUtils {
             [result[i], result[j]] = [result[j], result[i]];
         }
         return result;
+    }
+    
+    // Format date
+    static formatDate(date) {
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+    
+    // Get time ago description
+    static getTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+        
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        
+        const diffDays = Math.floor(diffHours / 24);
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     }
 }
 
@@ -428,12 +593,14 @@ class DataManager {
     }
 }
 
+// Main application class
 class WingoApp {
     constructor() {
         // Basic state
         this.currentPage = APP_CONSTANTS.PAGES.HOME;
         this.isLoading = true;
         this.countdownInterval = null;
+        this.dataPollingInterval = null;
         
         // API service
         this.apiService = new ApiService();
@@ -451,11 +618,11 @@ class WingoApp {
         this.historyCurrentPage = 1;
         this.historyPageSize = 20;
         
-        // Real-time data status
+        // Real-time data state
         this.isDataLoading = false;
         this.lastDataUpdate = null;
         
-        // Initialize configuration
+        // Configuration
         this.config = {
             baseAmount: APP_CONSTANTS.DEFAULTS.BASE_AMOUNT,
             maxHistory: APP_CONSTANTS.DEFAULTS.MAX_PREDICTION_HISTORY,
@@ -473,7 +640,7 @@ class WingoApp {
     setupErrorHandling() {
         window.addEventListener('error', (event) => {
             console.error('Global error:', event.error);
-            this.showToast('System error occurred, please refresh the page');
+            this.showToast('System error occurred, please refresh page');
         });
         
         window.addEventListener('unhandledrejection', (event) => {
@@ -486,7 +653,7 @@ class WingoApp {
         console.log('Starting application initialization...');
         
         try {
-            // First ensure basic data structures exist
+            // Ensure basic data structure exists
             this.historyData = this.historyData || [];
             this.trendData = this.trendData || [];
             this.patternData = this.patternData || [];
@@ -499,7 +666,7 @@ class WingoApp {
             // Asynchronous basic data generation - with error handling
             try {
                 await this.generateBasicData();
-                console.log('Basic data generation completed');
+                console.log('Basic data generation complete');
             } catch (dataError) {
                 console.error('Basic data generation failed, using default data:', dataError);
                 // Ensure at least some default data
@@ -512,13 +679,14 @@ class WingoApp {
             console.log('Starting timers...');
             // Start timers
             this.startCountdown();
+            this.startDataPolling();
             
             // Delayed initialization of other features
             setTimeout(() => {
                 try {
                     console.log('Setting up advanced features...');
                     this.setupAdvancedFeatures();
-                    console.log('Advanced features setup completed');
+                    console.log('Advanced features setup complete');
                 } catch (error) {
                     console.error('Advanced features setup failed:', error);
                 }
@@ -529,7 +697,7 @@ class WingoApp {
                 try {
                     console.log('Hiding loading screen...');
                     this.hideLoader();
-                    console.log('Application initialization completed');
+                    console.log('Application initialization complete');
                     
                     // Show initialization success message
                     setTimeout(() => {
@@ -549,7 +717,7 @@ class WingoApp {
             
         } catch (error) {
             console.error('Application initialization failed:', error);
-            this.showError('Application initialization failed, please refresh the page');
+            this.showError('Application initialization failed, please refresh page');
             
             // Even if initialization fails, hide loading screen
             setTimeout(() => {
@@ -558,6 +726,38 @@ class WingoApp {
                     loader.style.display = 'none';
                 }
             }, 2000);
+        }
+    }
+
+    // Start data polling for new draws
+    startDataPolling() {
+        // Start polling for new data every 2 seconds
+        this.apiService.startDataPolling((newData) => {
+            this.onNewDataReceived(newData);
+        });
+    }
+
+    // Handle new data received
+    onNewDataReceived(newData) {
+        console.log('New data received:', newData.length, 'records');
+        
+        // Update history data
+        this.historyData = newData;
+        
+        // Update UI if on home page
+        if (this.currentPage === APP_CONSTANTS.PAGES.HOME) {
+            this.updateRecentHistory();
+            this.updateHomeStats();
+            this.updateHotNumbers();
+        }
+        
+        // Update last update time
+        this.lastDataUpdate = new Date();
+        
+        // Show notification for new draw
+        if (newData.length > 0) {
+            const latestDraw = newData[0];
+            this.showToast(`New draw: Period ${latestDraw.period}, Number ${latestDraw.number}`, 'info');
         }
     }
 
@@ -575,7 +775,7 @@ class WingoApp {
             }, 300));
         });
 
-        // Feature card clicks
+        // Feature cards click
         const featureCards = AppUtils.getElements(APP_CONSTANTS.SELECTORS.FEATURE_CARDS);
         console.log('Found feature cards:', featureCards.length);
         featureCards.forEach(card => {
@@ -594,7 +794,7 @@ class WingoApp {
             });
         });
 
-        // Refresh stats button - using new ID
+        // Refresh stats button
         const refreshStatsBtn = AppUtils.getElement('#refreshStatsBtn');
         if (refreshStatsBtn) {
             refreshStatsBtn.addEventListener('click', AppUtils.debounce(async () => {
@@ -604,7 +804,7 @@ class WingoApp {
             console.warn('Refresh stats button not found');
         }
 
-        // "View All" buttons
+        // "View all" buttons
         const viewAllBtns = AppUtils.getElements('.view-all-btn');
         viewAllBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -615,7 +815,7 @@ class WingoApp {
             });
         });
 
-        // Stat card click events
+        // Stat cards click event
         const statCards = AppUtils.getElements('.stat-card');
         statCards.forEach(card => {
             card.addEventListener('click', () => {
@@ -635,19 +835,20 @@ class WingoApp {
     async generateBasicData() {
         console.log('Generating basic data...');
         
-        // Only generate homepage necessary data
+        // Only generate data necessary for home page
         await AppUtils.safeExecute(async () => {
-            // Asynchronously get historical record data
-            await this.generateHistoryData();
+            // Initialize with first 10 records
+            const initialData = await this.apiService.initializeFirstLoad();
+            this.historyData = initialData || [];
             
             // Generate other data based on real data
             this.generateHotNumbers();
             this.updateStats();
             
-            // Update homepage recent draw records
+            // Update recent draw history on home page
             this.updateRecentHistory();
             
-            // Update real-time issue information
+            // Update current period info
             this.updateCurrentPeriodInfo();
         }, this);
     }
@@ -669,7 +870,7 @@ class WingoApp {
             // Touch feedback
             this.setupTouchFeedback();
             
-            // Enhanced history record event listeners
+            // Enhanced history event listeners
             this.setupEnhancedHistoryEvents();
             
             // Quick preview button
@@ -685,12 +886,12 @@ class WingoApp {
             this.generatePatternData();
             this.generateStrategyData();
             
-            console.log('Advanced features setup completed');
+            console.log('Advanced features setup complete');
         }, this);
     }
 
     setupEventListeners() {
-        // Keep original method, called during page-specific initialization
+        // Keep original method, called during page specific initialization
         console.log('Setting up complete event listeners...');
         
         // Trend page events
@@ -842,7 +1043,7 @@ class WingoApp {
                 targetNavItem.classList.add('active');
             }
 
-            // Page-specific initialization
+            // Page specific initialization
             this.initializePage(pageId);
         }, this);
     }
@@ -1038,15 +1239,15 @@ class WingoApp {
         // Generate historical data
         for (let i = 0; i < periods; i++) {
             const number = AppUtils.randomInt(0, 9);
-            const timestamp = Date.now() - (periods - i) * 3 * 60 * 1000; // Every 3 minutes per issue
+            const timestamp = Date.now() - (periods - i) * 3 * 60 * 1000; // Every 3 minutes
             
             const result = {
-                period: `2023${String(i + 1).padStart(4, '0')}`,
+                period: `2025${String(i + 1).padStart(4, '0')}`,
                 number: number,
                 timestamp: timestamp,
                 size: number >= 5 ? 'big' : 'small',
                 parity: number % 2 === 0 ? 'even' : 'odd',
-                color: this.getNumberColor(number)
+                color: AppUtils.getNumberColor(number)
             };
 
             this.trendData.history.push(result);
@@ -1089,7 +1290,7 @@ class WingoApp {
         const recent = this.trendData.history.slice(-20);
         const trends = [];
 
-        // Big/small number trend
+        // Big number trend
         const bigCount = recent.filter(item => item.size === 'big').length;
         if (bigCount > 12) {
             trends.push({ type: 'size', trend: 'big', strength: 'strong', count: bigCount });
@@ -1097,7 +1298,7 @@ class WingoApp {
             trends.push({ type: 'size', trend: 'small', strength: 'strong', count: 20 - bigCount });
         }
 
-        // Odd/even number trend
+        // Odd number trend
         const oddCount = recent.filter(item => item.parity === 'odd').length;
         if (oddCount > 12) {
             trends.push({ type: 'parity', trend: 'odd', strength: 'strong', count: oddCount });
@@ -1195,7 +1396,7 @@ class WingoApp {
     }
 
     switchTrendChart(chartType) {
-        // Update tab status
+        // Update tab state
         document.querySelectorAll('.chart-tab').forEach(tab => {
             tab.classList.remove('active');
             tab.setAttribute('aria-selected', 'false');
@@ -1274,7 +1475,7 @@ class WingoApp {
         recent30.forEach(item => {
             const colorClass = item.color;
             html += `
-                <div class="timeline-item ${colorClass}" title="Issue: ${item.period}, Number: ${item.number}">
+                <div class="timeline-item ${colorClass}" title="Period: ${item.period}, Number: ${item.number}">
                     ${item.number}
                 </div>
             `;
@@ -1308,7 +1509,7 @@ class WingoApp {
             html += `
                 <div class="pattern-bar ${value}" 
                      style="height: ${height}%" 
-                     title="Issue: ${item.period}, ${type === 'size' ? 'Size' : 'Parity'}: ${value}">
+                     title="Period: ${item.period}, ${type === 'size' ? 'Size' : 'Parity'}: ${value}">
                 </div>
             `;
         });
@@ -1368,8 +1569,8 @@ class WingoApp {
     calculateBalance(value1, value2) {
         const diff = Math.abs(parseFloat(value1) - parseFloat(value2));
         if (diff < 5) return 'Balanced';
-        if (diff < 10) return 'Slight bias';
-        return parseFloat(value1) > parseFloat(value2) ? 'Strong big bias' : 'Strong small bias';
+        if (diff < 10) return 'Slightly biased';
+        return parseFloat(value1) > parseFloat(value2) ? 'Clearly big biased' : 'Clearly small biased';
     }
 
     renderColorChart() {
@@ -1386,7 +1587,7 @@ class WingoApp {
         container.innerHTML = `
             <div style="text-align: center; color: var(--text-secondary);">
                 <div style="font-size: 48px; margin-bottom: 8px;">📊</div>
-                <div>Color Distribution Pie Chart</div>
+                <div>Color Distribution Chart</div>
                 <div style="font-size: 12px; margin-top: 8px;">
                     Red ${patterns.red.percentage}% | 
                     Green ${patterns.green.percentage}% | 
@@ -1405,7 +1606,7 @@ class WingoApp {
 
         recent50.forEach(item => {
             html += `
-                <div class="color-dot ${item.color}" title="Issue: ${item.period}, Number: ${item.number}">
+                <div class="color-dot ${item.color}" title="Period: ${item.period}, Number: ${item.number}">
                     ${item.number}
                 </div>
             `;
@@ -1443,7 +1644,7 @@ class WingoApp {
 
         container.innerHTML = html;
 
-        // Update next issue prediction
+        // Update next period prediction
         const prediction = this.generateNextPeriodPrediction();
         AppUtils.safeExecute(() => {
             AppUtils.getElement('#nextTrendPrediction').textContent = prediction;
@@ -1468,7 +1669,7 @@ class WingoApp {
             const coldNumber = analysis.cold[0];
             insights.push({
                 icon: 'ac_unit',
-                text: `Number ${coldNumber.number} is currently coldest, only appeared ${coldNumber.count} times, worth watching for comeback`
+                text: `Number ${coldNumber.number} is currently coldest, only appeared ${coldNumber.count} times, watch for comeback`
             });
         }
 
@@ -1480,7 +1681,7 @@ class WingoApp {
             };
             insights.push({
                 icon: 'trending_up',
-                text: `${trendMap[trend.trend]} showing strong trend, appeared ${trend.count} times in last 20 issues`
+                text: `${trendMap[trend.trend]} showing strong trend, appeared ${trend.count} times in last 20 draws`
             });
         });
 
@@ -1494,8 +1695,8 @@ class WingoApp {
         if (trends.length > 0) {
             const mainTrend = trends[0];
             const trendMap = {
-                'big': 'Big numbers favored', 'small': 'Small numbers favored',
-                'odd': 'Odd numbers favored', 'even': 'Even numbers favored'
+                'big': 'Big numbers dominant', 'small': 'Small numbers dominant',
+                'odd': 'Odd numbers dominant', 'even': 'Even numbers dominant'
             };
             return trendMap[mainTrend.trend] || 'Balanced development';
         }
@@ -1523,7 +1724,7 @@ class WingoApp {
             html += `
                 <div class="missing-item" data-number="${num}" data-missing="${missingCount}">
                     <div class="missing-number">${num}</div>
-                    <div class="missing-count">Missing ${missingCount} issues</div>
+                    <div class="missing-count">Missing ${missingCount} draws</div>
                     <div class="missing-days ${level}">${this.getMissingLevel(missingCount)}</div>
                 </div>
             `;
@@ -1554,7 +1755,7 @@ class WingoApp {
             html += `
                 <div class="missing-item" data-pattern="${pattern.key}" data-missing="${missingCount}">
                     <div class="missing-number">${pattern.name}</div>
-                    <div class="missing-count">Missing ${missingCount} issues</div>
+                    <div class="missing-count">Missing ${missingCount} draws</div>
                     <div class="missing-days">${this.getMissingLevel(missingCount)}</div>
                 </div>
             `;
@@ -1579,8 +1780,8 @@ class WingoApp {
         const returnNumbers = missingValues.filter(val => val > 10).length;
 
         AppUtils.safeExecute(() => {
-            AppUtils.getElement('#maxMissing').textContent = `${maxMissing} issues`;
-            AppUtils.getElement('#avgMissing').textContent = `${avgMissing} issues`;
+            AppUtils.getElement('#maxMissing').textContent = `${maxMissing} draws`;
+            AppUtils.getElement('#avgMissing').textContent = `${avgMissing} draws`;
             AppUtils.getElement('#returnNumbers').textContent = `${returnNumbers} numbers`;
         });
     }
@@ -1614,21 +1815,21 @@ class WingoApp {
         container.innerHTML = `
             <div style="text-align: center; color: var(--text-secondary);">
                 <div style="font-size: 48px; margin-bottom: 16px;">📈</div>
-                <div style="font-size: 18px; margin-bottom: 8px;">Historical Comparison Analysis Chart</div>
+                <div style="font-size: 18px; margin-bottom: 8px;">Historical Comparison Chart</div>
                 <div style="font-size: 14px;">Showing data comparison trends across different periods</div>
             </div>
         `;
     }
 
     updateTrendPeriod(period) {
-        // Regenerate data for specified period count
+        // Regenerate data for specified period
         this.generateComprehensiveTrendData();
         this.renderTrendStatusCard();
         this.refreshCurrentChart();
         this.updateSmartAnalysis();
         this.renderMissingAnalysis();
         
-        this.showToast(`Switched to analysis of last ${period} issues`);
+        this.showToast(`Switched to last ${period} draws analysis`);
     }
 
     updateComparisonPeriod(period) {
@@ -1672,7 +1873,7 @@ class WingoApp {
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Current Missing</div>
-                            <div class="stat-value">${data.missing} issues</div>
+                            <div class="stat-value">${data.missing} draws</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-label">Last Appeared</div>
@@ -1705,7 +1906,7 @@ class WingoApp {
                 <div class="modal-body">
                     <div class="missing-detail">
                         <div class="missing-level ${this.getMissingLevel(missing).toLowerCase()}">
-                            Current missing: ${missing} issues (${this.getMissingLevel(missing)})
+                            Current missing: ${missing} draws (${this.getMissingLevel(missing)})
                         </div>
                         <div class="missing-advice">
                             ${this.getMissingAdvice(missing)}
@@ -1721,11 +1922,11 @@ class WingoApp {
 
     getMissingAdvice(missing) {
         if (missing > 15) {
-            return 'Extremely missing, recommend close attention, likely to return soon';
+            return 'Extremely missing, highly recommended to watch, likely to return soon';
         } else if (missing > 10) {
             return 'Highly missing, worth watching, high probability of return';
         } else if (missing > 5) {
-            return 'Medium missing, keep watching, consider moderately';
+            return 'Moderately missing, keep watching, consider moderately';
         }
         return 'Normal missing, no special attention needed';
     }
@@ -1771,12 +1972,6 @@ class WingoApp {
 
         // Reverse array, newest first
         this.trendData.numbers.reverse();
-    }
-
-    getNumberColor(number) {
-        if (APP_CONSTANTS.NUMBER_COLORS.RED.includes(number)) return 'red';
-        if (APP_CONSTANTS.NUMBER_COLORS.GREEN.includes(number)) return 'green';
-        if (APP_CONSTANTS.NUMBER_COLORS.PURPLE.includes(number)) return 'purple';
     }
 
     switchChart(chartType) {
@@ -1828,7 +2023,7 @@ class WingoApp {
         const container = AppUtils.getElement('.number-trend-grid');
         if (!container) return;
 
-        // Count appearances for each number
+        // Count appearances of each number
         const numberStats = {};
         for (let i = 0; i <= 9; i++) {
             numberStats[i] = 0;
@@ -1851,14 +2046,14 @@ class WingoApp {
             element.className = 'trend-number';
             element.textContent = i;
 
-            // Determine heat level
+            // Determine heat
             if (count >= avgCount + 2) {
                 element.classList.add('hot');
             } else if (count <= avgCount - 2) {
                 element.classList.add('cold');
             }
 
-            // Check if appeared in last 5 issues
+            // Check if appeared in recent 5 draws
             const recentNumbers = this.trendData.numbers.slice(-5).map(item => item.number);
             if (recentNumbers.includes(i)) {
                 element.classList.add('recent');
@@ -1879,7 +2074,7 @@ class WingoApp {
 
         container.innerHTML = '';
         
-        // Get last 20 issues data
+        // Get last 20 draws data
         const recentData = this.trendData.numbers.slice(-20);
         
         recentData.forEach(item => {
@@ -1908,7 +2103,7 @@ class WingoApp {
 
         container.innerHTML = '';
         
-        // Get last 20 issues data
+        // Get last 20 draws data
         const recentData = this.trendData.numbers.slice(-20);
         
         recentData.forEach(item => {
@@ -1937,7 +2132,7 @@ class WingoApp {
 
         container.innerHTML = '';
         
-        // Get last 30 issues data
+        // Get last 30 draws data
         const recentData = this.trendData.numbers.slice(-30);
         
         recentData.forEach(item => {
@@ -2059,11 +2254,11 @@ class WingoApp {
         const coldNumbers = Object.keys(numberStats).filter(num => numberStats[num] === minCount);
 
         if (hotAnalysis) {
-            hotAnalysis.textContent = `Numbers ${hotNumbers.join(', ')} appeared most frequently, ${maxCount} times total, recommend attention`;
+            hotAnalysis.textContent = `Numbers ${hotNumbers.join(', ')} appear most frequently, ${maxCount} times total, recommended to watch`;
         }
 
         if (coldAnalysis) {
-            coldAnalysis.textContent = `Numbers ${coldNumbers.join(', ')} appeared least frequently, ${minCount} times total, may rebound`;
+            coldAnalysis.textContent = `Numbers ${coldNumbers.join(', ')} appear least frequently, ${minCount} times total, possible rebound`;
         }
 
         if (patternAnalysis) {
@@ -2072,13 +2267,13 @@ class WingoApp {
             const oddCount = recent5.filter(item => item.odd).length;
             
             let pattern = '';
-            if (bigCount >= 4) pattern += 'Big numbers appearing consecutively, ';
-            if (bigCount <= 1) pattern += 'Small numbers appearing consecutively, ';
+            if (bigCount >= 4) pattern += 'Big numbers appearing continuously, ';
+            if (bigCount <= 1) pattern += 'Small numbers appearing continuously, ';
             if (oddCount >= 4) pattern += 'Odd numbers dense, ';
             if (oddCount <= 1) pattern += 'Even numbers dense, ';
             
             pattern = pattern || 'Number distribution relatively balanced, ';
-            patternAnalysis.textContent = pattern + 'recommend combining with missing data analysis';
+            patternAnalysis.textContent = pattern + 'recommend combining missing data analysis';
         }
     }
 
@@ -2091,7 +2286,7 @@ class WingoApp {
         const container = AppUtils.getElement('number-missing');
         if (!container) return;
 
-        // Calculate missing issues for each number
+        // Calculate missing draws for each number
         const missingData = {};
         for (let i = 0; i <= 9; i++) {
             missingData[i] = 0;
@@ -2101,13 +2296,13 @@ class WingoApp {
         for (let i = this.trendData.numbers.length - 1; i >= 0; i--) {
             const number = this.trendData.numbers[i].number;
             
-            // Find this number, update missing count for other numbers
+            // Find this number, update missing for other numbers
             for (let j = 0; j <= 9; j++) {
                 if (j === number) {
                     // Found, stop calculating missing for this number
                     continue;
                 } else {
-                    // Not found, continue accumulating missing count
+                    // Not found, continue accumulating missing
                     if (missingData[j] === 0) {
                         missingData[j] = this.trendData.numbers.length - i;
                     }
@@ -2127,9 +2322,9 @@ class WingoApp {
             
             const count = document.createElement('div');
             count.className = 'missing-count';
-            count.textContent = `Missing ${missing} issues`;
+            count.textContent = `Missing ${missing} draws`;
             
-            // Set style based on missing count
+            // Set style based on missing draws
             if (missing >= 10) {
                 count.classList.add('cold');
             } else if (missing <= 2) {
@@ -2176,7 +2371,7 @@ class WingoApp {
             
             const count = document.createElement('div');
             count.className = 'missing-count';
-            count.textContent = `Missing ${missing} issues`;
+            count.textContent = `Missing ${missing} draws`;
             
             if (missing >= 8) {
                 count.classList.add('cold');
@@ -2215,9 +2410,9 @@ class WingoApp {
 
     showNumberDetail(number, count) {
         const recent = this.trendData.numbers.filter(item => item.number === number).slice(-5);
-        const periods = recent.map(item => `Issue ${item.period}`).join(', ');
+        const periods = recent.map(item => `Period ${item.period}`).join(', ');
         
-        this.showToast(`Number ${number}: Appeared ${count} times, Recently: ${periods || 'None'}`);
+        this.showToast(`Number ${number}: Appeared ${count} times, Recent appearances: ${periods || 'None'}`);
     }
 
     setupPatternPageEvents() {
@@ -2250,7 +2445,7 @@ class WingoApp {
             }, 1000));
         }
 
-        // Pattern cell click events
+        // Pattern cell click event
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('road-cell')) {
                 AppUtils.safeExecute(() => this.showRoadCellDetail(e.target), this);
@@ -2273,7 +2468,7 @@ class WingoApp {
                 big: number >= 5,
                 odd: number % 2 === 1,
                 color: AppUtils.getNumberColor(number),
-                timestamp: new Date(Date.now() - i * 5 * 60 * 1000) // Every 5 minutes per issue
+                timestamp: new Date(Date.now() - i * 5 * 60 * 1000) // Every 5 minutes
             };
             this.patternData.roads.push(roadEntry);
         }
@@ -2294,7 +2489,7 @@ class WingoApp {
             activeTab.classList.add('active');
         }
 
-        // Show corresponding pattern chart
+        // Show corresponding pattern
         this.showPatternChart(patternType);
     }
 
@@ -2340,7 +2535,7 @@ class WingoApp {
             const roadCell = document.createElement('div');
             roadCell.className = `road-cell ${cell.type}`;
             roadCell.textContent = cell.number;
-            roadCell.title = `Issue ${cell.period}: ${cell.number} (${cell.type === 'big' ? 'Big' : 'Small'})`;
+            roadCell.title = `Period ${cell.period}: ${cell.number} (${cell.type === 'big' ? 'Big' : 'Small'})`;
             roadCell.setAttribute('data-period', cell.period);
             roadCell.setAttribute('data-number', cell.number);
             
@@ -2369,7 +2564,7 @@ class WingoApp {
             const roadCell = document.createElement('div');
             roadCell.className = `road-cell ${cell.type}`;
             roadCell.textContent = cell.number;
-            roadCell.title = `Issue ${cell.period}: ${cell.number} (${cell.type === 'odd' ? 'Odd' : 'Even'})`;
+            roadCell.title = `Period ${cell.period}: ${cell.number} (${cell.type === 'odd' ? 'Odd' : 'Even'})`;
             roadCell.setAttribute('data-period', cell.period);
             roadCell.setAttribute('data-number', cell.number);
             
@@ -2398,7 +2593,7 @@ class WingoApp {
             const roadCell = document.createElement('div');
             roadCell.className = `road-cell ${cell.color}`;
             roadCell.textContent = cell.number;
-            roadCell.title = `Issue ${cell.period}: ${cell.number} (${this.getColorName(cell.color)})`;
+            roadCell.title = `Period ${cell.period}: ${cell.number} (${this.getColorName(cell.color)})`;
             roadCell.setAttribute('data-period', cell.period);
             roadCell.setAttribute('data-number', cell.number);
             
@@ -2415,11 +2610,11 @@ class WingoApp {
     }
 
     renderComprehensiveRoad() {
-        // Render size mini road
+        // Render size road
         this.renderMiniRoad('mini-size-road', 'big');
-        // Render parity mini road
+        // Render parity road
         this.renderMiniRoad('mini-parity-road', 'odd');
-        // Render color mini road
+        // Render color road
         this.renderMiniColorRoad('mini-color-road');
     }
 
@@ -2659,15 +2854,15 @@ class WingoApp {
         let suggestion = '';
         
         if (lastItem.big && bigCount >= 3) {
-            suggestion = 'Big numbers appearing consecutively, recommend watching small numbers';
+            suggestion = 'Big numbers appearing continuously, watch small numbers';
         } else if (!lastItem.big && bigCount <= 2) {
-            suggestion = 'Small numbers appearing consecutively, recommend watching big numbers';
+            suggestion = 'Small numbers appearing continuously, watch big numbers';
         } else if (lastItem.odd && oddCount >= 3) {
-            suggestion = 'Odd numbers appearing consecutively, recommend watching even numbers';
+            suggestion = 'Odd numbers appearing continuously, watch even numbers';
         } else if (!lastItem.odd && oddCount <= 2) {
-            suggestion = 'Even numbers appearing consecutively, recommend watching odd numbers';
+            suggestion = 'Even numbers appearing continuously, watch odd numbers';
         } else {
-            suggestion = 'Current pattern relatively balanced, recommend following trend';
+            suggestion = 'Current pattern relatively balanced, follow trend';
         }
 
         if (currentPatternElement) currentPatternElement.textContent = currentPattern;
@@ -2700,10 +2895,10 @@ class WingoApp {
         ];
         const maxStreak = Math.max(...allStreaks, 0);
 
-        // Calculate pattern index
+        // Calculate regularity index
         const totalPeriods = this.patternData.roads.length;
         const avgJumps = (sizeJumps + parityJumps + colorJumps) / 3;
-        const expectedJumps = totalPeriods * 0.5; // Theoretically 50% jump rate
+        const expectedJumps = totalPeriods * 0.5; // Theoretical 50% jump rate
         const patternIndex = Math.max(0, Math.min(100, (1 - Math.abs(avgJumps - expectedJumps) / expectedJumps) * 100));
 
         if (sizeTotalJumpsElement) sizeTotalJumpsElement.textContent = sizeJumps;
@@ -2805,7 +3000,7 @@ class WingoApp {
                     cell.className.includes('green') ? 'Green' :
                     cell.className.includes('purple') ? 'Purple' : '';
 
-        this.showToast(`Issue ${period}: ${number} (${type})`);
+        this.showToast(`Period ${period}: ${number} (${type})`);
     }
 
     setupStrategyPageEvents() {
@@ -2870,7 +3065,7 @@ class WingoApp {
             });
         });
 
-        // Clear records button
+        // Clear history button
         const clearHistoryBtn = AppUtils.getElement('clear-history-btn');
         if (clearHistoryBtn) {
             clearHistoryBtn.addEventListener('click', () => {
@@ -2931,7 +3126,7 @@ class WingoApp {
 
         console.log('Initializing strategy data, base amount:', this.strategyData.config.baseAmount);
 
-        // Generate bet history
+        // Generate betting records
         for (let i = 0; i < 10; i++) {
             const isWin = AppUtils.randomInt(0, 1) > 0.3;
             const amount = this.strategyData.config.baseAmount + AppUtils.randomInt(0, 50);
@@ -2954,7 +3149,7 @@ class WingoApp {
         // Generate profit chart data
         this.generateProfitChartData();
 
-        console.log('Strategy data generation completed:', this.strategyData);
+        console.log('Strategy data generation complete:', this.strategyData);
     }
 
     // Calculate strategy statistics
@@ -3040,12 +3235,12 @@ class WingoApp {
 
     getStrategyDescription(strategyType) {
         const descriptions = {
-            'ai': 'Based on machine learning algorithm, analyzes historical data and real-time trends, intelligently recommends optimal betting solutions. Considers multiple dimensions: number heat, pattern rules, pattern analysis, etc.',
-            'follow': 'Follow current hot trends for betting, continue betting when a certain number or pattern appears consecutively. Suitable for periods with obvious trends, relatively low risk.',
-            'reverse': 'Reverse betting strategy, bet opposite results when a certain pattern appears multiple times consecutively. Based on reversal principle, suitable for rebound situations.',
-            'martin': 'Classic Martingale strategy, double bet after each loss until win. Theoretically ensures profit but requires sufficient funds.',
-            'flat': 'Fixed amount betting strategy, same bet amount each time. Controllable risk, suitable for conservative investors, relatively stable long-term returns.',
-            'wave': 'Wave-style betting strategy, adjusts bet amount and frequency based on market fluctuations. Increase bets at lows, decrease at highs, pursuing wave profits.'
+            'ai': 'Based on machine learning algorithms, analyzes historical data and real-time trends, intelligently recommends optimal betting solutions. Considers multiple dimensions including number heat, pattern rules, pattern analysis.',
+            'follow': 'Follow current hot trend for betting, when a number or pattern appears continuously, continue following. Suitable for obvious trend periods, relatively low risk.',
+            'reverse': 'Reverse betting strategy, when a pattern appears multiple times continuously, bet opposite result. Based on reversal principle, suitable for rebound situations.',
+            'martin': 'Classic Martingale strategy, double bet after each loss until win. Theoretically guarantees profit, but requires sufficient capital support.',
+            'flat': 'Fixed amount betting strategy, each bet amount remains same. Risk controllable, suitable for conservative investors, relatively stable long-term returns.',
+            'wave': 'Wave betting strategy, adjust bet amount and frequency based on market fluctuations. Increase bets at lows, decrease at highs, pursue wave profits.'
         };
         return descriptions[strategyType] || 'No strategy description available';
     }
@@ -3081,23 +3276,23 @@ class WingoApp {
             targetBtn.classList.add('active');
         }
 
-        // Update configuration
+        // Update config
         this.strategyData.config.baseAmount = amount;
 
-        // Update recommendation amount
+        // Update recommended amount
         this.updateRecommendationAmount();
     }
 
     updateRecommendationAmount() {
         // Ensure strategy data exists
         if (!this.strategyData || !this.strategyData.config) {
-            console.warn('Strategy data or config not initialized, cannot update recommendation amount');
+            console.warn('Strategy data or config not initialized, cannot update recommended amount');
             return;
         }
 
         const amountElement = AppUtils.getElement('recommendation-amount');
         if (amountElement) {
-            amountElement.textContent = `${this.strategyData.config.baseAmount} yuan`;
+            amountElement.textContent = `$${this.strategyData.config.baseAmount}`;
         }
     }
 
@@ -3144,7 +3339,7 @@ class WingoApp {
             reasonElement.textContent = this.generateRecommendationReason(numbers[0], patterns);
         }
 
-        // Update recommendation amount
+        // Update recommended amount
         this.updateRecommendationAmount();
     }
 
@@ -3154,18 +3349,18 @@ class WingoApp {
             { name: 'Small', active: number < 5 },
             { name: 'Odd', active: number % 2 === 1 },
             { name: 'Even', active: number % 2 === 0 },
-            { name: 'Red', active: APP_CONSTANTS.NUMBER_COLORS.RED.includes(number) },
-            { name: 'Green', active: APP_CONSTANTS.NUMBER_COLORS.GREEN.includes(number) },
-            { name: 'Purple', active: APP_CONSTANTS.NUMBER_COLORS.PURPLE.includes(number) }
+            { name: 'Red', active: [2, 4, 6, 8].includes(number) || number === 0 },
+            { name: 'Green', active: [1, 3, 7, 9].includes(number) || number === 5 },
+            { name: 'Purple', active: [0, 5].includes(number) }
         ].filter(p => p.active);
     }
 
     generateRecommendationReason(number, patterns) {
         const reasons = [
-            `Based on AI analysis, number ${number} has been active recently, ${patterns.map(p => p.name).join('')} pattern appearing consecutively, high probability this trend continues next issue.`,
-            `Pattern analysis reveals ${patterns.map(p => p.name).join('')} pattern about to rebound, number ${number} has high appearance potential.`,
-            `Historical data shows number ${number} hit rate reaches 85% in current environment, recommend close attention.`,
-            `According to heat statistics, number ${number} is in rising period, combined with ${patterns.map(p => p.name).join('')} pattern, recommend betting.`
+            `Based on AI analysis, number ${number} has been active recently, ${patterns.map(p => p.name).join('')} pattern appearing continuously, high probability this trend continues next draw.`,
+            `Pattern analysis shows ${patterns.map(p => p.name).join('')} pattern about to rebound, number ${number} has high appearance potential.`,
+            `Historical data shows number ${number} hit rate reaches 85% in current environment, recommend focusing.`,
+            `Heat statistics show number ${number} in rising period, combined with ${patterns.map(p => p.name).join('')} pattern, recommend betting.`
         ];
         return reasons[AppUtils.randomInt(0, reasons.length - 1)];
     }
@@ -3181,7 +3376,7 @@ class WingoApp {
         const totalProfitElement = AppUtils.getElement('total-profit');
         if (totalProfitElement) {
             const profit = this.strategyData.stats.totalProfit;
-            totalProfitElement.textContent = profit >= 0 ? `+¥${profit}` : `-¥${Math.abs(profit)}`;
+            totalProfitElement.textContent = profit >= 0 ? `+$${profit}` : `-$${Math.abs(profit)}`;
             totalProfitElement.className = `stat-value ${profit >= 0 ? 'profit' : 'loss'}`;
         }
 
@@ -3191,7 +3386,7 @@ class WingoApp {
             winRateElement.textContent = `${this.strategyData.stats.winRate}%`;
         }
 
-        // Update bet count
+        // Update total bets
         const totalBetsElement = AppUtils.getElement('total-bets');
         if (totalBetsElement) {
             totalBetsElement.textContent = this.strategyData.stats.totalBets;
@@ -3281,7 +3476,7 @@ class WingoApp {
             
             const height = Math.max(5, Math.abs(item.profit) / maxProfit * maxHeight);
             bar.style.height = `${height}px`;
-            bar.title = `Issue ${item.period}: ${item.profit >= 0 ? '+' : ''}${item.profit} yuan`;
+            bar.title = `Period ${item.period}: ${item.profit >= 0 ? '+' : ''}$${item.profit}`;
             
             chartContainer.appendChild(bar);
         });
@@ -3301,7 +3496,7 @@ class WingoApp {
             historyList.innerHTML = `
                 <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                     <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">📋</div>
-                    <p>No bet history available</p>
+                    <p>No betting records available</p>
                 </div>
             `;
             return;
@@ -3314,7 +3509,7 @@ class WingoApp {
                     <div class="bet-time">${AppUtils.formatTime(bet.time)}</div>
                 </div>
                 <div class="bet-result">
-                    <div class="bet-amount ${bet.status}">${bet.profit >= 0 ? '+' : ''}¥${bet.profit}</div>
+                    <div class="bet-amount ${bet.status}">${bet.profit >= 0 ? '+' : ''}$${bet.profit}</div>
                     <div class="bet-status ${bet.status}">${bet.status === 'win' ? 'Win' : 'Lose'}</div>
                 </div>
             </div>
@@ -3330,7 +3525,7 @@ class WingoApp {
 
         this.strategyData.history = [];
         this.updateBetHistory();
-        this.showToast('Bet history cleared');
+        this.showToast('Betting records cleared');
     }
 
     showBacktestModal() {
@@ -3392,7 +3587,7 @@ class WingoApp {
         return this.performBacktestCalculation(periods, initialCapital, this.strategyData.config.baseAmount);
     }
 
-    // Core logic for performing backtest calculation
+    // Core logic for backtest calculation
     performBacktestCalculation(periods, initialCapital, baseAmount) {
         let capital = initialCapital;
         let maxCapital = initialCapital;
@@ -3469,17 +3664,17 @@ class WingoApp {
         const chartDisplay = AppUtils.getElement('backtest-chart');
         if (!chartDisplay) return;
 
-        // Simple text display, actual projects could use chart library
+        // Simple text display, can use chart library in actual project
         chartDisplay.innerHTML = `
             <div style="text-align: center; padding: 20px;">
                 <div style="font-size: 24px; font-weight: bold; color: var(--primary-color); margin-bottom: 10px;">
-                    ¥${chartData[chartData.length - 1].capital.toFixed(0)}
+                    $${chartData[chartData.length - 1].capital.toFixed(0)}
                 </div>
                 <div style="color: var(--text-secondary); margin-bottom: 15px;">Final Capital</div>
                 <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary);">
-                    <span>Start: ¥${chartData[0].capital.toFixed(0)}</span>
-                    <span>Max: ¥${Math.max(...chartData.map(d => d.capital)).toFixed(0)}</span>
-                    <span>Min: ¥${Math.min(...chartData.map(d => d.capital)).toFixed(0)}</span>
+                    <span>Start: $${chartData[0].capital.toFixed(0)}</span>
+                    <span>High: $${Math.max(...chartData.map(d => d.capital)).toFixed(0)}</span>
+                    <span>Low: $${Math.min(...chartData.map(d => d.capital)).toFixed(0)}</span>
                 </div>
             </div>
         `;
@@ -3488,10 +3683,10 @@ class WingoApp {
     setupLanguageManager() {
         console.log('Setting up language manager...');
         
-        // Simplified initialization, only set basic language
+        // Simplify initialization, only set basic language
         try {
             i18n.init();
-            console.log('Language manager initialization completed');
+            console.log('Language manager initialization complete');
         } catch (error) {
             console.warn('Language manager initialization failed:', error);
         }
@@ -3500,7 +3695,7 @@ class WingoApp {
     setupLanguageEvents() {
         console.log('Setting up language events...');
         
-        // Language button click events
+        // Language button click event
         const languageBtn = AppUtils.getElement('#languageBtn');
         const languageModal = AppUtils.getElement('#languageModal');
         const closeLanguageModal = AppUtils.getElement('#closeLanguageModal');
@@ -3526,7 +3721,7 @@ class WingoApp {
                 });
             }
             
-            // Language selection events
+            // Language selection event
             languageModal.querySelectorAll('.language-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const lang = item.getAttribute('data-lang');
@@ -3576,7 +3771,7 @@ class WingoApp {
             // Generate strategy data
             this.generateStrategyData();
             
-            // Initialize pages
+            // Initialize all pages
             this.initializePage(APP_CONSTANTS.PAGES.HOME);
         }, this);
     }
@@ -3587,6 +3782,11 @@ class WingoApp {
         if (this.countdownInterval) {
             clearInterval(this.countdownInterval);
             this.countdownInterval = null;
+        }
+        
+        if (this.dataPollingInterval) {
+            clearInterval(this.dataPollingInterval);
+            this.dataPollingInterval = null;
         }
 
         // Clear event listeners
@@ -3613,91 +3813,27 @@ class WingoApp {
         }
     }
 
-    // History related configuration
-
-    // Generate historical data - using real API data
-    async generateHistoryData() {
-        console.log('Starting to fetch real historical data...');
-        
-        // Show loading state
-        this.isDataLoading = true;
-        this.showLoadingState('Fetching latest draw data...');
-        
-        try {
-            // Get real data from API
-            const apiData = await this.apiService.getHistoryData();
-            
-            if (apiData && apiData.length > 0) {
-                this.historyData = apiData;
-                this.lastDataUpdate = new Date();
-                console.log(`Successfully fetched ${apiData.length} real historical records`);
-                
-                // Update UI display
-                this.hideLoadingState();
-                this.showToast('Historical data updated', 'success');
-            } else {
-                console.warn('API returned empty data, generating mock data');
-                this.generateFallbackHistoryData();
-            }
-            
-        } catch (error) {
-            console.error('Failed to fetch API data:', error);
-            this.generateFallbackHistoryData();
-            this.showToast('Data fetch failed, using mock data', 'warning');
-        } finally {
-            this.isDataLoading = false;
-            this.hideLoadingState();
-        }
-        
-        // Initialize filtered data
-        this.filteredHistoryData = [...this.historyData];
-        
-        console.log('Historical data processing completed:', this.historyData.length, 'records');
-    }
-
-    // Show loading state
-    showLoadingState(message = 'Loading...') {
-        const liveCard = AppUtils.getElement('.live-card');
-        if (liveCard) {
-            const loadingOverlay = document.createElement('div');
-            loadingOverlay.className = 'loading-overlay';
-            loadingOverlay.innerHTML = `
-                <div class="loading-spinner"></div>
-                <div class="loading-text">${message}</div>
-            `;
-            liveCard.appendChild(loadingOverlay);
-        }
-    }
-
-    // Hide loading state
-    hideLoadingState() {
-        const loadingOverlay = AppUtils.getElement('.loading-overlay');
-        if (loadingOverlay) {
-            loadingOverlay.remove();
-        }
-    }
-
-    // Fallback historical data generation
+    // Backup history data generation
     generateFallbackHistoryData() {
-        console.log('Generating fallback historical data...');
+        console.log('Generating backup historical data...');
         
         this.historyData = [];
         const now = new Date();
         
-        // Generate last 100 issues historical data
+        // Generate last 100 draws history data
         for (let i = 0; i < 100; i++) {
-            const periodTime = new Date(now.getTime() - i * 5 * 60 * 1000); // Every 5 minutes per issue
+            const periodTime = new Date(now.getTime() - i * 5 * 60 * 1000); // Every 5 minutes
             const number = AppUtils.randomInt(0, 9);
             const color = AppUtils.getNumberColor(number);
             
             const historyRecord = {
-                period: `2024${String(1000 + (99 - i))}`,
+                period: `2025${String(1000 + (99 - i))}`,
                 time: periodTime,
                 number: number,
                 big: number >= 5,
                 odd: number % 2 === 1,
                 color: color,
-                patterns: this.generateHistoryPatterns(number),
+                patterns: this.generateHistoryPatterns(number, color),
                 isApi: false // Mark as non-API data
             };
             
@@ -3712,7 +3848,7 @@ class WingoApp {
         // Clear cache
         this.apiService.cache.clear();
         
-        // Refetch data
+        // Re-fetch data
         await this.generateHistoryData();
         
         // Update related UI
@@ -3721,16 +3857,12 @@ class WingoApp {
         this.updateHotNumbers();
     }
 
-    generateHistoryPatterns(number) {
+    generateHistoryPatterns(number, color) {
         const patterns = [];
         
-        if (number >= 5) patterns.push('Big');
-        else patterns.push('Small');
+        patterns.push(number >= 5 ? 'Big' : 'Small');
+        patterns.push(number % 2 === 1 ? 'Odd' : 'Even');
         
-        if (number % 2 === 1) patterns.push('Odd');
-        else patterns.push('Even');
-        
-        const color = AppUtils.getNumberColor(number);
         if (color === 'red') patterns.push('Red');
         else if (color === 'green') patterns.push('Green');
         else if (color === 'purple') patterns.push('Purple');
@@ -3788,7 +3920,7 @@ class WingoApp {
             }
         });
 
-        // Frequency analysis toggle
+        // Frequency analysis switching
         AppUtils.getElements('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const view = e.target.getAttribute('data-view');
@@ -3899,7 +4031,7 @@ class WingoApp {
         this.updateFrequencyAnalysis();
         this.updateHistoryTable();
 
-        console.log('Filtering completed, total', filtered.length, 'records');
+        console.log('Filtering complete, total', filtered.length, 'records');
     }
 
     // Update historical statistics
@@ -3939,12 +4071,12 @@ class WingoApp {
         const dateRange = AppUtils.getElement('#dateRange')?.value || 'month';
         const periodNames = {
             'today': 'Today',
-            'week': 'Last 7 days',
-            'month': 'Last 30 days',
+            'week': 'Last 7 Days',
+            'month': 'Last 30 Days',
             'custom': 'Custom'
         };
         if (statsPeriodText) {
-            statsPeriodText.textContent = periodNames[dateRange] || 'Last 30 days';
+            statsPeriodText.textContent = periodNames[dateRange] || 'Last 30 Days';
         }
     }
 
@@ -3968,7 +4100,7 @@ class WingoApp {
             frequencies[item.number].count++;
         });
 
-        // Calculate percentages and determine hot/cold status
+        // Calculate percentage and determine hot/cold status
         const counts = Object.values(frequencies).map(f => f.count);
         const avgCount = counts.reduce((a, b) => a + b, 0) / counts.length;
 
@@ -4010,7 +4142,7 @@ class WingoApp {
 
     // Switch analysis view
     switchAnalysisView(view) {
-        // Update toggle button status
+        // Update toggle button state
         AppUtils.getElements('.toggle-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -4045,7 +4177,7 @@ class WingoApp {
         trendChart.innerHTML = `
             <div style="text-align: center; padding: 40px;">
                 <div style="font-size: 18px; font-weight: 600; color: var(--primary-color); margin-bottom: 16px;">
-                    Last ${recentData.length} Issues Trend
+                    Last ${recentData.length} Draws Trend
                 </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
                     ${recentData.map(item => `
@@ -4060,7 +4192,7 @@ class WingoApp {
                             color: white;
                             font-weight: 700;
                             font-size: 14px;
-                        " title="Issue ${item.period}: ${item.number}">${item.number}</div>
+                        " title="Period ${item.period}: ${item.number}">${item.number}</div>
                     `).join('')}
                 </div>
                 <div style="margin-top: 16px; font-size: 12px; color: var(--text-secondary);">
@@ -4097,7 +4229,7 @@ class WingoApp {
             recordCount.textContent = this.filteredHistoryData.length;
         }
 
-        // Update load more button status
+        // Update load more button state
         const loadMoreBtn = AppUtils.getElement('#loadMoreHistory');
         if (loadMoreBtn) {
             if (endIndex >= this.filteredHistoryData.length) {
@@ -4154,19 +4286,19 @@ class WingoApp {
         const patterns = item.patterns.join(' | ');
         const time = item.time.toLocaleString('en-US');
         
-        this.showToast(`Issue ${period} Details\nDraw Time: ${time}\nDraw Number: ${item.number}\nNumber Patterns: ${patterns}`);
+        this.showToast(`Period ${period} Details\nDraw Time: ${time}\nDraw Number: ${item.number}\nNumber Patterns: ${patterns}`);
     }
 
     // Export historical data
     exportHistoryData() {
         const data = this.filteredHistoryData;
         if (data.length === 0) {
-            this.showToast('No data available for export');
+            this.showToast('No data available to export');
             return;
         }
 
         // Create CSV content
-        const headers = ['Issue', 'Draw Time', 'Draw Number', 'Size', 'Parity', 'Color'];
+        const headers = ['Period', 'Draw Time', 'Draw Number', 'Size', 'Parity', 'Color'];
         const csvContent = [
             headers.join(','),
             ...data.map(item => [
@@ -4195,9 +4327,9 @@ class WingoApp {
         this.showToast('Data exported successfully');
     }
 
-    // Update homepage recent draw records
+    // Update home page recent draws
     updateRecentHistory() {
-        console.log('Updating homepage recent draw records...');
+        console.log('Updating home page recent draws...');
         
         const recentHistoryList = AppUtils.getElement('#recentHistoryList');
         if (!recentHistoryList) return;
@@ -4237,32 +4369,32 @@ class WingoApp {
         // Update historical statistics cards
         this.updateHistoryStatsCards();
         
-        // Update load more button status
+        // Update load more button state
         this.updateLoadMoreButton(filteredData.length, displayCount);
     }
 
-    // Apply historical record filters
+    // Apply history record filters
     applyHistoryFilters() {
         if (!this.historyData.length) return [];
         
         const activeFilters = this.getActiveHistoryFilters();
         
         return this.historyData.filter(item => {
-            // Size filtering
+            // Size filter
             if (activeFilters.size !== 'all') {
                 const isBig = item.number >= 5;
                 if (activeFilters.size === 'big' && !isBig) return false;
                 if (activeFilters.size === 'small' && isBig) return false;
             }
             
-            // Parity filtering
+            // Parity filter
             if (activeFilters.parity !== 'all') {
                 const isOdd = item.number % 2 === 1;
                 if (activeFilters.parity === 'odd' && !isOdd) return false;
                 if (activeFilters.parity === 'even' && isOdd) return false;
             }
             
-            // Color filtering
+            // Color filter
             if (activeFilters.color !== 'all') {
                 if (item.color !== activeFilters.color) return false;
             }
@@ -4297,7 +4429,7 @@ class WingoApp {
         };
     }
 
-    // Set up historical record item events
+    // Set up history record item events
     setupHistoryItemEvents() {
         const historyItems = AppUtils.getElements('.recent-history-item');
         
@@ -4341,7 +4473,7 @@ class WingoApp {
         const lastUpdateEl = AppUtils.getElement('#lastUpdate');
         if (lastUpdateEl) {
             const now = new Date();
-            const timeAgo = this.getTimeAgo(now);
+            const timeAgo = AppUtils.getTimeAgo(now);
             lastUpdateEl.textContent = timeAgo;
         }
     }
@@ -4361,7 +4493,7 @@ class WingoApp {
             type = 'Small';
         }
         
-        // Calculate consecutive count
+        // Calculate continuous count
         for (let i = 1; i < data.length; i++) {
             const currentNumber = data[i].number;
             const isBig = currentNumber >= 5;
@@ -4423,22 +4555,6 @@ class WingoApp {
         return coldNumber;
     }
 
-    // Get time ago description
-    getTimeAgo(date) {
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / (1000 * 60));
-        
-        if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins} minutes ago`;
-        
-        const diffHours = Math.floor(diffMins / 60);
-        if (diffHours < 24) return `${diffHours} hours ago`;
-        
-        const diffDays = Math.floor(diffHours / 24);
-        return `${diffDays} days ago`;
-    }
-
     // Update load more button
     updateLoadMoreButton(totalCount, currentCount) {
         const loadMoreBtn = AppUtils.getElement('#loadMoreHistory');
@@ -4450,11 +4566,11 @@ class WingoApp {
             loadMoreBtn.style.display = 'flex';
             const remainingCount = totalCount - currentCount;
             const buttonText = loadMoreBtn.querySelector('span:last-child') || loadMoreBtn;
-            buttonText.textContent = `View more history (${remainingCount} more)`;
+            buttonText.textContent = `View More History (${remainingCount} more)`;
         }
     }
 
-    // Show history detail modal
+    // Show history record details modal
     showHistoryDetailModal(period, index) {
         const item = this.historyData[index];
         if (!item) return;
@@ -4481,7 +4597,7 @@ class WingoApp {
                         <div class="detail-info-grid">
                             <div class="detail-info-item">
                                 <div class="detail-info-value">${period}</div>
-                                <div class="detail-info-label">Issue</div>
+                                <div class="detail-info-label">Period</div>
                             </div>
                             <div class="detail-info-item">
                                 <div class="detail-info-value">${AppUtils.formatTime(item.time)}</div>
@@ -4520,7 +4636,7 @@ class WingoApp {
         this.setupHistoryDetailModalEvents(modal);
     }
 
-    // Set up history detail modal events
+    // Set up history details modal events
     setupHistoryDetailModalEvents(modal) {
         const closeBtn = modal.querySelector('.history-detail-close');
         const overlay = modal;
@@ -4548,7 +4664,7 @@ class WingoApp {
         });
     }
 
-    // Set up enhanced history events for homepage
+    // Set up enhanced history events for home page
     setupEnhancedHistoryEvents() {
         // Filter toggle button
         const filterHistoryBtn = AppUtils.getElement('#filterHistoryBtn');
@@ -4574,7 +4690,7 @@ class WingoApp {
             });
         });
         
-        // History stat card click events
+        // History statistics cards click events
         const historyStatCards = AppUtils.getElements('.history-stat-card');
         historyStatCards.forEach(card => {
             card.addEventListener('click', () => {
@@ -4582,7 +4698,7 @@ class WingoApp {
             });
         });
         
-        // Load more button events
+        // Load more button event
         const loadMoreBtn = AppUtils.getElement('#loadMoreHistory');
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', () => {
@@ -4594,7 +4710,7 @@ class WingoApp {
         this.historyDisplayCount = 8;
     }
 
-    // Toggle history filter display
+    // Toggle history filters display
     toggleHistoryFilters() {
         const filtersEl = AppUtils.getElement('#historyFilters');
         const filterBtn = AppUtils.getElement('#filterHistoryBtn');
@@ -4636,7 +4752,7 @@ class WingoApp {
         this.updateRecentHistory();
     }
 
-    // Handle history stat card click
+    // Handle history statistics card click
     handleHistoryStatCardClick(card) {
         const statValue = card.querySelector('.stat-value');
         const statLabel = card.querySelector('.stat-label');
@@ -4647,27 +4763,9 @@ class WingoApp {
         }
     }
 
-    // Load more history records
-    loadMoreHistoryRecords() {
-        const loadMoreBtn = AppUtils.getElement('#loadMoreHistory');
-        if (!loadMoreBtn) return;
-        
-        // Show loading state
-        loadMoreBtn.classList.add('loading');
-        
-        // Increase display count
-        this.historyDisplayCount = (this.historyDisplayCount || 8) + 10;
-        
-        // Delay to simulate loading process
-        setTimeout(() => {
-            this.updateRecentHistory();
-            loadMoreBtn.classList.remove('loading');
-        }, 800);
-    }
-
-    // Refresh homepage data - fixed missing function
+    // Refresh home page data
     refreshHomeData() {
-        console.log('Refreshing homepage data...');
+        console.log('Refreshing home page data...');
         
         // Update countdown
         this.updateCountdown();
@@ -4678,7 +4776,7 @@ class WingoApp {
         // Update hot numbers
         this.updateHotNumbers();
         
-        // Update recent draw records
+        // Update recent draws
         this.updateRecentHistory();
         
         // Ensure data integrity
@@ -4687,20 +4785,20 @@ class WingoApp {
         }
     }
 
-    // Update homepage statistics
+    // Update home page statistics
     updateHomeStats() {
         if (!this.historyData.length) return;
         
         const recentData = this.historyData.slice(0, 20);
         
-        // Update stat cards
+        // Update statistics cards
         this.updateStatCard('total-periods', this.historyData.length);
         this.updateStatCard('today-draws', this.getTodayDrawsCount());
         this.updateStatCard('hot-number', this.getHottestNumber(recentData).number);
         this.updateStatCard('cold-number', this.getColdestNumber(recentData).number);
     }
 
-    // Update stat card
+    // Update statistics card
     updateStatCard(cardId, value) {
         const card = AppUtils.getElement(`#${cardId}`);
         if (card) {
@@ -4740,7 +4838,7 @@ class WingoApp {
         
         hotNumbersList.innerHTML = hotNumbers.map(item => `
             <div class="hot-number-item" data-number="${item.number}">
-                <span class="number ${this.getNumberColor(item.number)}">${item.number}</span>
+                <span class="number ${AppUtils.getNumberColor(item.number)}">${item.number}</span>
                 <span class="count">${item.count}</span>
             </div>
         `).join('');
@@ -4760,7 +4858,7 @@ class WingoApp {
         countdownEl.textContent = `00:${seconds.toString().padStart(2, '0')}`;
     }
 
-    // Show Toast message
+    // Show toast message
     showToast(message, type = 'info') {
         // Create toast element
         const toast = document.createElement('div');
@@ -4792,16 +4890,16 @@ class WingoApp {
         }, 3000);
     }
 
-    // Show stat details
+    // Show statistics details
     showStatDetail(statType) {
         let message = '';
         
         switch(statType) {
             case 'total-periods':
-                message = `Total ${this.historyData.length} draw records recorded`;
+                message = `Total ${this.historyData.length} draw records`;
                 break;
             case 'today-draws':
-                message = `Today's draws: ${this.getTodayDrawsCount()} issues`;
+                message = `Today ${this.getTodayDrawsCount()} draws`;
                 break;
             case 'hot-number':
                 const hot = this.getHottestNumber(this.historyData.slice(0, 20));
@@ -4917,7 +5015,7 @@ class WingoApp {
     // Update statistics
     updateStats() {
         if (!this.historyData || !this.historyData.length) {
-            console.warn('No historical data, skipping stats update');
+            console.warn('No historical data, skipping statistics update');
             return;
         }
 
@@ -4942,7 +5040,7 @@ class WingoApp {
         this.updateStatElement('#evenPercent', `${evenPercent}%`);
     }
 
-    // Update stat element
+    // Update statistics element
     updateStatElement(selector, value) {
         const element = AppUtils.getElement(selector);
         if (element) {
@@ -4950,16 +5048,16 @@ class WingoApp {
         }
     }
 
-    // Update current issue information
+    // Update current period info
     updateCurrentPeriodInfo() {
         const periodElement = AppUtils.getElement('.period-number');
         if (periodElement && this.historyData && this.historyData.length > 0) {
             const currentPeriod = parseInt(this.historyData[0].period) + 1;
-            periodElement.textContent = `Issue ${currentPeriod.toString().padStart(8, '0')}`;
+            periodElement.textContent = `Period ${currentPeriod.toString().padStart(8, '0')}`;
         }
     }
 
-    // Generate hot numbers - fixed function
+    // Generate hot numbers
     generateHotNumbers() {
         console.log('Generating hot numbers...');
         
@@ -4992,15 +5090,104 @@ class WingoApp {
         }
     }
 
-    // Set up language events
-    setupLanguageEvents() {
-        // Simple language event setup, empty for now
-        console.log('Language events setup completed');
-    }
-
     // Show quick preview
     showQuickPreview() {
         this.showToast('Quick preview feature under development...', 'info');
+    }
+
+    // Generate new prediction
+    generateNewPrediction() {
+        console.log('Generating new prediction...');
+        
+        // Generate random prediction
+        const prediction = {
+            id: Date.now(),
+            time: new Date(),
+            numbers: [
+                AppUtils.randomInt(0, 9),
+                AppUtils.randomInt(0, 9),
+                AppUtils.randomInt(0, 9)
+            ],
+            confidence: AppUtils.randomInt(70, 95),
+            pattern: ['Big', 'Small', 'Odd', 'Even'][AppUtils.randomInt(0, 3)]
+        };
+        
+        // Add to history
+        this.predictionHistory.unshift(prediction);
+        
+        // Limit history size
+        if (this.predictionHistory.length > this.config.maxHistory) {
+            this.predictionHistory = this.predictionHistory.slice(0, this.config.maxHistory);
+        }
+        
+        // Update display
+        this.updatePredictionHistory();
+        
+        this.showToast('New prediction generated', 'success');
+    }
+
+    // Update prediction history
+    updatePredictionHistory() {
+        const historyList = AppUtils.getElement('#predictionHistoryList');
+        if (!historyList) return;
+        
+        if (this.predictionHistory.length === 0) {
+            historyList.innerHTML = '<div class="empty-state">No prediction history</div>';
+            return;
+        }
+        
+        historyList.innerHTML = this.predictionHistory.map(pred => `
+            <div class="prediction-history-item">
+                <div class="prediction-time">${AppUtils.formatTime(pred.time)}</div>
+                <div class="prediction-numbers">
+                    ${pred.numbers.map(num => 
+                        `<span class="prediction-number ${AppUtils.getNumberColor(num)}">${num}</span>`
+                    ).join('')}
+                </div>
+                <div class="prediction-confidence">${pred.confidence}%</div>
+                <div class="prediction-pattern">${pred.pattern}</div>
+            </div>
+        `).join('');
+    }
+
+    // Show detailed analysis
+    showDetailedAnalysis() {
+        this.showToast('Detailed analysis feature under development...', 'info');
+    }
+
+    // Reset parameters
+    resetParameters() {
+        // Reset all parameter sliders to default
+        const sliders = AppUtils.getElements('.parameter-slider');
+        sliders.forEach(slider => {
+            slider.value = slider.getAttribute('data-default') || 50;
+            const valueDisplay = slider.parentElement.querySelector('.parameter-value');
+            if (valueDisplay) {
+                valueDisplay.textContent = slider.value;
+            }
+        });
+        
+        this.showToast('Parameters reset to defaults', 'info');
+    }
+
+    // Clear prediction history
+    clearPredictionHistory() {
+        this.predictionHistory = [];
+        this.updatePredictionHistory();
+        this.showToast('Prediction history cleared', 'info');
+    }
+
+    // Update language selector
+    updateLanguageSelector() {
+        const languageItems = AppUtils.getElements('.language-item');
+        languageItems.forEach(item => {
+            const lang = item.getAttribute('data-lang');
+            if (lang === i18n.currentLanguage) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
     }
 }
 
@@ -5014,7 +5201,8 @@ const i18n = {
             'nav.predict': 'Predict',
             'nav.trend': 'Trend',
             'nav.pattern': 'Pattern',
-            'nav.strategy': 'Strategy'
+            'nav.strategy': 'Strategy',
+            'nav.history': 'History'
         },
         zh: {
             'app.title': 'Wingo预测',
@@ -5022,7 +5210,8 @@ const i18n = {
             'nav.predict': '预测',
             'nav.trend': '走势',
             'nav.pattern': '路单',
-            'nav.strategy': '策略'
+            'nav.strategy': '策略',
+            'nav.history': '历史'
         }
     },
     
@@ -5039,8 +5228,26 @@ const i18n = {
         return this.translations[this.currentLanguage]?.[key] || key;
     },
     
+    setLanguage(lang) {
+        if (this.translations[lang]) {
+            this.currentLanguage = lang;
+            this.updateDocumentLang();
+            this.updateUI();
+        }
+    },
+    
     updateDocumentLang() {
         document.documentElement.lang = this.currentLanguage;
+    },
+    
+    updateUI() {
+        // Update all translatable elements
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            if (key) {
+                element.textContent = this.t(key);
+            }
+        });
     }
 };
 
@@ -5063,7 +5270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Record initialization time
         const initTime = performance.now() - startTime;
-        console.log(`Application initialization completed, time taken: ${initTime.toFixed(2)}ms`);
+        console.log(`Application initialization complete, time taken: ${initTime.toFixed(2)}ms`);
         
         // Global error handling
         window.app = app;
@@ -5099,19 +5306,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
-        console.log('Application started successfully!');
+        console.log('Application startup successful!');
         
     } catch (error) {
         console.error('Application startup failed:', error);
         
-        // Show error message
+        // Show error prompt
         const errorDiv = document.createElement('div');
         errorDiv.innerHTML = `
             <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                         background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                         text-align: center; z-index: 10000;">
                 <h3 style="color: #e53e3e; margin-bottom: 10px;">Application Startup Failed</h3>
-                <p style="margin-bottom: 15px;">Please refresh the page and try again</p>
+                <p style="margin-bottom: 15px;">Please refresh page and try again</p>
                 <button onclick="location.reload()" 
                         style="background: #3182ce; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
                     Refresh Page
