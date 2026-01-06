@@ -1,121 +1,744 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>历史记录功能测试</title>
+    <title>Wingo Prediction - Official Test Interface</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        /* Reset and Base Styles */
+        * {
             margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .test-container {
-            max-width: 400px;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        .wingo-header {
+            background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+            padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #ff0080, #ff8c00);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 0, 128, 0.3);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Prediction Dashboard */
+        .prediction-dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #00c6ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard-title::before {
+            content: "🎯";
+            font-size: 28px;
+        }
+
+        /* Prediction Grid */
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .prediction-card {
+            background: linear-gradient(135deg, rgba(0, 114, 255, 0.1), rgba(0, 198, 255, 0.1));
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 198, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 198, 255, 0.2);
+            border-color: rgba(0, 198, 255, 0.4);
+        }
+
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .prediction-card:hover::before {
+            left: 100%;
+        }
+
+        .prediction-type {
+            font-size: 16px;
+            color: #a0a0c0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prediction-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .prediction-accuracy {
+            font-size: 14px;
+            color: #ffcc00;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Number Display */
+        .number-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid rgba(0, 198, 255, 0.2);
+        }
+
+        .current-number {
+            font-size: 80px;
+            font-weight: 800;
+            color: #ff0080;
+            text-shadow: 0 0 30px rgba(255, 0, 128, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 10px;
+        }
+
+        .next-draw-info {
+            font-size: 18px;
+            color: #00c6ff;
+            margin-bottom: 10px;
+        }
+
+        .countdown-timer {
+            font-size: 24px;
+            color: #ffcc00;
+            font-weight: 600;
+        }
+
+        /* History Section */
+        .history-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #00c6ff;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .test-title {
             text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
-        .test-item {
-            padding: 10px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #007bff;
+
+        .history-item:hover {
+            background: rgba(0, 198, 255, 0.2);
+            transform: scale(1.05);
         }
-        .test-item h3 {
-            margin: 0 0 5px 0;
-            color: #333;
+
+        .history-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
         }
-        .test-item p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-        .status {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
+
+        .history-time {
             font-size: 12px;
-            font-weight: bold;
+            color: #a0a0c0;
         }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
+
+        /* Statistics Section */
+        .stats-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
         }
-        .status.pending {
-            background: #fff3cd;
-            color: #856404;
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
-        .link {
-            display: block;
+
+        .stat-item {
+            background: linear-gradient(135deg, rgba(255, 0, 128, 0.1), rgba(255, 140, 0, 0.1));
+            border-radius: 15px;
+            padding: 25px;
             text-align: center;
-            margin-top: 20px;
-            padding: 12px;
-            background: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background 0.2s;
         }
-        .link:hover {
-            background: #0056b3;
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 16px;
+            color: #a0a0c0;
+        }
+
+        /* Controls */
+        .controls-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00c6ff, #0072ff);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff0080, #ff8c00);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        .wingo-footer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px 0;
+            margin-top: 50px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-text {
+            color: #a0a0c0;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .prediction-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .current-number {
+                font-size: 60px;
+                letter-spacing: 5px;
+            }
+
+            .history-grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+
+            .controls-section {
+                flex-direction: column;
+            }
+
+            .control-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 0 10px;
+            }
+
+            .prediction-dashboard,
+            .history-section,
+            .stats-section {
+                padding: 20px;
+            }
+
+            .current-number {
+                font-size: 48px;
+                letter-spacing: 3px;
+            }
+        }
+
+        /* Animation Classes */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Loading State */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            100% { left: 100%; }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <div class="test-container">
-        <h1 class="test-title">🎯 首页历史记录功能测试</h1>
-        
-        <div class="test-item">
-            <h3>✅ HTML结构增强 <span class="status success">完成</span></h3>
-            <p>添加了过滤器、统计卡片、详情模态框等新元素</p>
+    <!-- Header Section -->
+    <header class="wingo-header">
+        <div class="header-container">
+            <div class="logo">
+                <div class="logo-icon">W</div>
+                <h1 class="logo-text">WINGO PREDICTION</h1>
+            </div>
+            <div class="header-info">
+                <div class="next-draw-info">Next Draw: <span class="countdown-timer">00:59</span></div>
+            </div>
         </div>
-        
-        <div class="test-item">
-            <h3>✅ CSS样式完善 <span class="status success">完成</span></h3>
-            <p>为新增元素添加了完整的样式定义和响应式设计</p>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Current Number Display -->
+        <div class="number-display">
+            <div class="current-number pulse">5</div>
+            <div class="next-draw-info">Next Prediction in: <span class="countdown-timer">00:58</span></div>
         </div>
-        
-        <div class="test-item">
-            <h3>✅ JavaScript功能增强 <span class="status success">完成</span></h3>
-            <p>实现了过滤、统计、详情展示等交互功能</p>
-        </div>
-        
-        <div class="test-item">
-            <h3>🔧 主要功能特性</h3>
-            <p>
-                • 历史记录过滤（大小、单双、颜色）<br>
-                • 统计卡片（当前连号、最热/冷号码、更新时间）<br>
-                • 点击查看详情模态框<br>
-                • 加载更多记录功能<br>
-                • 移动端优化和触摸交互
-            </p>
-        </div>
-        
-        <div class="test-item">
-            <h3>📱 响应式设计 <span class="status success">完成</span></h3>
-            <p>针对不同屏幕尺寸进行了优化，支持移动端和桌面端</p>
-        </div>
-        
-        <a href="index.html" class="link">🚀 查看完整应用</a>
-        
-        <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px; font-size: 14px; color: #0066cc;">
-            <strong>💡 使用说明：</strong><br>
-            1. 在首页"最近开奖"部分可以看到新增的功能<br>
-            2. 点击过滤按钮可以筛选历史记录<br>
-            3. 点击统计卡片查看详细信息<br>
-            4. 点击历史记录项查看开奖详情<br>
-            5. 支持加载更多历史记录
+
+        <!-- Prediction Dashboard -->
+        <section class="prediction-dashboard">
+            <h2 class="dashboard-title">AI Prediction Dashboard</h2>
+            
+            <div class="prediction-grid">
+                <div class="prediction-card float">
+                    <div class="prediction-type">
+                        <span>🔮</span> Next Number Prediction
+                    </div>
+                    <div class="prediction-value">8</div>
+                    <div class="prediction-accuracy">
+                        <span>📊</span> Accuracy: 94.7%
+                    </div>
+                </div>
+
+                <div class="prediction-card float" style="animation-delay: 0.5s;">
+                    <div class="prediction-type">
+                        <span>🎲</span> Color Prediction
+                    </div>
+                    <div class="prediction-value" style="color: #ff3333;">Red</div>
+                    <div class="prediction-accuracy">
+                        <span>📊</span> Confidence: 91.2%
+                    </div>
+                </div>
+
+                <div class="prediction-card float" style="animation-delay: 1s;">
+                    <div class="prediction-type">
+                        <span>📈</span> Size Prediction
+                    </div>
+                    <div class="prediction-value">Big</div>
+                    <div class="prediction-accuracy">
+                        <span>📊</span> Probability: 88.5%
+                    </div>
+                </div>
+
+                <div class="prediction-card float" style="animation-delay: 1.5s;">
+                    <div class="prediction-type">
+                        <span>⚖️</span> Odd/Even
+                    </div>
+                    <div class="prediction-value">Odd</div>
+                    <div class="prediction-accuracy">
+                        <span>📊</span> Certainty: 92.3%
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="history-section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Results History</h2>
+                <div class="time-filter">
+                    <span>🕐</span> Last 50 Draws
+                </div>
+            </div>
+            
+            <div class="history-grid">
+                <div class="history-item tooltip" data-tooltip="Draw #2024001 - 15:30">
+                    <div class="history-number" style="color: #00ff88;">9</div>
+                    <div class="history-time">2 min ago</div>
+                </div>
+                <div class="history-item tooltip" data-tooltip="Draw #2024000 - 15:29">
+                    <div class="history-number" style="color: #ff3333;">2</div>
+                    <div class="history-time">3 min ago</div>
+                </div>
+                <div class="history-item tooltip" data-tooltip="Draw #2023999 - 15:28">
+                    <div class="history-number" style="color: #00ff88;">7</div>
+                    <div class="history-time">4 min ago</div>
+                </div>
+                <div class="history-item tooltip" data-tooltip="Draw #2023998 - 15:27">
+                    <div class="history-number" style="color: #ff3333;">1</div>
+                    <div class="history-time">5 min ago</div>
+                </div>
+                <div class="history-item tooltip" data-tooltip="Draw #2023997 - 15:26">
+                    <div class="history-number" style="color: #00ff88;">8</div>
+                    <div class="history-time">6 min ago</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section class="stats-section">
+            <h2 class="section-title">Live Statistics</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">76.4%</div>
+                    <div class="stat-label">Red Appearances</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">23.6%</div>
+                    <div class="stat-label">Green Appearances</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">62.1%</div>
+                    <div class="stat-label">Big Numbers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">54.8%</div>
+                    <div class="stat-label">Odd Numbers</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Control Buttons -->
+        <div class="controls-section">
+            <button class="control-btn btn-primary">
+                <span>🔄</span> Refresh Predictions
+            </button>
+            <button class="control-btn btn-secondary">
+                <span>📥</span> Load More History
+            </button>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="wingo-footer">
+        <div class="footer-container">
+            <p class="footer-text">© 2024 Wingo Prediction System. All predictions are generated by advanced AI algorithms.</p>
+            <p class="footer-text">This is a demonstration interface for testing purposes.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Wingo Prediction System - Test Interface Loaded');
+            
+            // Update countdown timer
+            function updateCountdown() {
+                const timerElement = document.querySelector('.countdown-timer');
+                if (!timerElement) return;
+                
+                let time = parseInt(timerElement.textContent) || 60;
+                time--;
+                
+                if (time < 0) {
+                    time = 60;
+                    // Simulate number change
+                    const currentNumber = document.querySelector('.current-number');
+                    if (currentNumber) {
+                        const newNumber = Math.floor(Math.random() * 9) + 1;
+                        currentNumber.textContent = newNumber;
+                        currentNumber.style.color = newNumber > 4 ? '#ff3333' : '#00ff88';
+                        
+                        // Add pulse animation
+                        currentNumber.classList.remove('pulse');
+                        void currentNumber.offsetWidth; // Trigger reflow
+                        currentNumber.classList.add('pulse');
+                    }
+                }
+                
+                timerElement.textContent = time.toString().padStart(2, '0');
+            }
+            
+            // Update countdown every second
+            setInterval(updateCountdown, 1000);
+            
+            // Add click handlers for prediction cards
+            document.querySelectorAll('.prediction-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    this.classList.toggle('loading');
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                    }, 1500);
+                });
+            });
+            
+            // Add hover effect for history items
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+                
+                item.addEventListener('click', function() {
+                    const number = this.querySelector('.history-number').textContent;
+                    alert(`Selected Number: ${number}\nThis would show detailed analysis in the full version.`);
+                });
+            });
+            
+            // Button click handlers
+            document.querySelectorAll('.control-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const btnText = this.textContent;
+                    this.classList.add('loading');
+                    
+                    setTimeout(() => {
+                        this.classList.remove('loading');
+                        if (btnText.includes('Refresh')) {
+                            // Simulate prediction refresh
+                            document.querySelectorAll('.prediction-value').forEach(value => {
+                                const randomChange = Math.random() > 0.5;
+                                if (randomChange) {
+                                    const current = parseInt(value.textContent);
+                                    if (!isNaN(current)) {
+                                        value.textContent = Math.floor(Math.random() * 9) + 1;
+                                    } else if (value.textContent === 'Red') {
+                                        value.textContent = 'Green';
+                                        value.style.color = '#00ff88';
+                                    } else if (value.textContent === 'Green') {
+                                        value.textContent = 'Red';
+                                        value.style.color = '#ff3333';
+                                    } else if (value.textContent === 'Big') {
+                                        value.textContent = 'Small';
+                                    } else if (value.textContent === 'Small') {
+                                        value.textContent = 'Big';
+                                    } else if (value.textContent === 'Odd') {
+                                        value.textContent = 'Even';
+                                    } else if (value.textContent === 'Even') {
+                                        value.textContent = 'Odd';
+                                    }
+                                }
+                            });
+                            
+                            // Show notification
+                            showNotification('Predictions refreshed successfully!');
+                        } else if (btnText.includes('Load More')) {
+                            showNotification('Loading more history data...');
+                        }
+                    }, 1000);
+                });
+            });
+            
+            // Show notification function
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(45deg, #00c6ff, #0072ff);
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+                
+                // Add CSS for animations
+                if (!document.querySelector('#notification-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'notification-styles';
+                    style.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+            
+            // Simulate initial loading
+            setTimeout(() => {
+                showNotification('Wingo Prediction System Initialized!');
+            }, 1000);
+        });
+    </script>
 </body>
-</html> 
+</html>
