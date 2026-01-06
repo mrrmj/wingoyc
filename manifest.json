@@ -1,7 +1,7 @@
 {
-  "name": "Wingo彩票分析助手",
-  "short_name": "Wingo分析",
-  "description": "专业的彩票预测分析工具，提供智能预测、走势分析、路单分析等功能",
+  "name": "Wingo Lottery Analysis Assistant",
+  "short_name": "Wingo Analysis",
+  "description": "Professional lottery prediction analysis tool providing intelligent predictions, trend analysis, pattern analysis, and more",
   "version": "1.0.0",
   "start_url": "/",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "theme_color": "#407bff",
   "background_color": "#ffffff",
   "categories": ["entertainment", "utilities"],
-  "lang": "zh-CN",
+  "lang": "en-US",
   "scope": "/",
   "icons": [
     {
@@ -55,9 +55,9 @@
   ],
   "shortcuts": [
     {
-      "name": "智能预测",
-      "short_name": "预测",
-      "description": "快速进入智能预测功能",
+      "name": "Smart Prediction",
+      "short_name": "Prediction",
+      "description": "Quick access to intelligent prediction function",
       "url": "/?page=predict",
       "icons": [
         {
@@ -68,9 +68,9 @@
       ]
     },
     {
-      "name": "走势分析",
-      "short_name": "走势",
-      "description": "查看号码走势分析",
+      "name": "Trend Analysis",
+      "short_name": "Trend",
+      "description": "View number trend analysis",
       "url": "/?page=trend",
       "icons": [
         {
@@ -81,9 +81,9 @@
       ]
     },
     {
-      "name": "路单分析",
-      "short_name": "路单",
-      "description": "分析大小单双路单",
+      "name": "Pattern Analysis",
+      "short_name": "Pattern",
+      "description": "Analyze Big/Small/Odd/Even patterns",
       "url": "/?page=pattern",
       "icons": [
         {
@@ -96,4 +96,4 @@
   ],
   "related_applications": [],
   "prefer_related_applications": false
-} 
+}
