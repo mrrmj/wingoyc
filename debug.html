@@ -1,74 +1,644 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wingo - 调试版本</title>
+    <title>Wingo Prediction System - Debug Version</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
-        .debug-panel { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
-        .status.success { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
-        .status.info { background: #d1ecf1; color: #0c5460; }
-        .loader-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #667eea; 
-                         color: white; display: flex; align-items: center; justify-content: center; 
-                         flex-direction: column; z-index: 9999; }
-        .loader-screen.hidden { opacity: 0; pointer-events: none; transition: opacity 0.5s; }
-        .recent-history-list { margin-top: 20px; }
-        .history-item { padding: 10px; background: #f8f9fa; margin: 5px 0; border-radius: 4px; }
-        .hot-numbers-list { margin-top: 20px; }
-        .hot-number-item { display: inline-block; padding: 8px; margin: 5px; background: #007bff; 
-                           color: white; border-radius: 4px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .loader-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 9999;
+            font-size: 24px;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .debug-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .debug-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .debug-header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .debug-icon {
+            font-size: 32px;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .status.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .status.info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+            border-left: 5px solid #17a2b8;
+        }
+        
+        .status.warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .status-icon {
+            font-size: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stat-percent {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: normal;
+        }
+        
+        .history-section {
+            margin-top: 30px;
+        }
+        
+        .history-list {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .history-item {
+            padding: 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+            border-left: 5px solid transparent;
+        }
+        
+        .history-item:hover {
+            background: #e9ecef;
+        }
+        
+        .history-item.red {
+            border-left-color: #dc3545;
+        }
+        
+        .history-item.green {
+            border-left-color: #28a745;
+        }
+        
+        .history-item.violet {
+            border-left-color: #6f42c1;
+        }
+        
+        .history-number {
+            font-size: 24px;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+        }
+        
+        .number-red { background: #dc3545; }
+        .number-green { background: #28a745; }
+        .number-violet { background: #6f42c1; }
+        
+        .history-info {
+            flex-grow: 1;
+            padding: 0 20px;
+        }
+        
+        .history-period {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .history-time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .history-properties {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .property-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .property-badge.big { background: #007bff; color: white; }
+        .property-badge.small { background: #6c757d; color: white; }
+        .property-badge.odd { background: #fd7e14; color: white; }
+        .property-badge.even { background: #20c997; color: white; }
+        
+        .hot-numbers-section {
+            margin-top: 30px;
+        }
+        
+        .hot-numbers-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .hot-number-item {
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 100px;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            transition: transform 0.3s ease;
+        }
+        
+        .hot-number-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .hot-number-rank {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .hot-number-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .hot-number-count {
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .prediction-section {
+            margin-top: 30px;
+        }
+        
+        .prediction-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .prediction-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+        
+        .prediction-card.big {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .prediction-card.small {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .prediction-card.odd {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .prediction-card.even {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .prediction-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .prediction-percent {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .prediction-number {
+            font-size: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .debug-log {
+            margin-top: 30px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-time {
+            color: #6c757d;
+            margin-right: 10px;
+        }
+        
+        .log-message {
+            color: #495057;
+        }
+        
+        .api-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .history-info {
+                padding: 10px 0;
+            }
+            
+            .hot-numbers-list {
+                justify-content: center;
+            }
+            
+            .api-controls {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- 加载屏幕 -->
+    <!-- Loader Screen -->
     <div class="loader-screen">
-        <div>🎯 正在初始化应用...</div>
-        <div style="margin-top: 10px;">请稍候</div>
+        <div class="loader-spinner"></div>
+        <div>🎯 Initializing Wingo Prediction System...</div>
+        <div style="margin-top: 10px; font-size: 16px; opacity: 0.8;">Please wait while we analyze the data</div>
     </div>
 
-    <!-- 调试面板 -->
-    <div class="debug-panel">
-        <h1>🛠️ Wingo应用调试版</h1>
-        <div id="debugStatus" class="status info">正在初始化...</div>
-        <div id="debugLog"></div>
-    </div>
+    <div class="container">
+        <!-- Main Debug Panel -->
+        <div class="debug-panel">
+            <div class="debug-header">
+                <div class="debug-icon">🛠️</div>
+                <h1>Wingo Prediction System - Debug Version</h1>
+            </div>
+            
+            <div id="debugStatus" class="status info">
+                <span class="status-icon">⏳</span>
+                <span>Initializing application...</span>
+            </div>
+            
+            <!-- API Controls -->
+            <div class="api-controls">
+                <button class="btn btn-primary" onclick="fetchLatestData()">
+                    <span>🔄</span> Fetch Latest Data
+                </button>
+                <button class="btn btn-success" onclick="runAnalysis()">
+                    <span>📊</span> Run Analysis
+                </button>
+                <button class="btn btn-warning" onclick="generatePredictions()">
+                    <span>🔮</span> Generate Predictions
+                </button>
+                <button class="btn btn-danger" onclick="clearData()">
+                    <span>🗑️</span> Clear Cache
+                </button>
+            </div>
+        </div>
 
-    <!-- 简化的首页内容 -->
-    <div class="debug-panel">
-        <h2>📊 统计数据</h2>
-        <div>大号概率: <span id="bigPercent">-</span></div>
-        <div>小号概率: <span id="smallPercent">-</span></div>
-        <div>单号概率: <span id="oddPercent">-</span></div>
-        <div>双号概率: <span id="evenPercent">-</span></div>
-    </div>
+        <!-- Statistics Panel -->
+        <div class="debug-panel">
+            <h2>📊 Probability Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Big Numbers (5-9)</h3>
+                    <div class="stat-value" id="bigPercent">-</div>
+                    <div class="stat-percent">Probability</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Small Numbers (0-4)</h3>
+                    <div class="stat-value" id="smallPercent">-</div>
+                    <div class="stat-percent">Probability</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Odd Numbers</h3>
+                    <div class="stat-value" id="oddPercent">-</div>
+                    <div class="stat-percent">Probability</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Even Numbers</h3>
+                    <div class="stat-value" id="evenPercent">-</div>
+                    <div class="stat-percent">Probability</div>
+                </div>
+            </div>
+        </div>
 
-    <div class="debug-panel">
-        <h2>🔥 热门号码</h2>
-        <div class="hot-numbers-list" id="hotNumbersList">暂无数据</div>
-    </div>
+        <!-- Recent History Panel -->
+        <div class="debug-panel">
+            <div class="history-section">
+                <h2>📈 Recent Lottery History</h2>
+                <div class="history-list" id="recentHistoryList">
+                    <div class="history-item">
+                        <div style="text-align: center; padding: 20px; color: #6c757d;">
+                            Loading history data...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="debug-panel">
-        <h2>📈 最近开奖</h2>
-        <div class="recent-history-list" id="recentHistoryList">暂无数据</div>
+        <!-- Hot Numbers Panel -->
+        <div class="debug-panel">
+            <div class="hot-numbers-section">
+                <h2>🔥 Hot Numbers Analysis</h2>
+                <div class="hot-numbers-list" id="hotNumbersList">
+                    <div class="hot-number-item">
+                        <div class="hot-number-rank">#1</div>
+                        <div class="hot-number-value">-</div>
+                        <div class="hot-number-count">0 times</div>
+                    </div>
+                    <div class="hot-number-item">
+                        <div class="hot-number-rank">#2</div>
+                        <div class="hot-number-value">-</div>
+                        <div class="hot-number-count">0 times</div>
+                    </div>
+                    <div class="hot-number-item">
+                        <div class="hot-number-rank">#3</div>
+                        <div class="hot-number-value">-</div>
+                        <div class="hot-number-count">0 times</div>
+                    </div>
+                    <div class="hot-number-item">
+                        <div class="hot-number-rank">#4</div>
+                        <div class="hot-number-value">-</div>
+                        <div class="hot-number-count">0 times</div>
+                    </div>
+                    <div class="hot-number-item">
+                        <div class="hot-number-rank">#5</div>
+                        <div class="hot-number-value">-</div>
+                        <div class="hot-number-count">0 times</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prediction Panel -->
+        <div class="debug-panel">
+            <div class="prediction-section">
+                <h2>🔮 Next Draw Predictions</h2>
+                <div class="prediction-cards">
+                    <div class="prediction-card big">
+                        <div class="prediction-title">Big Number Prediction</div>
+                        <div class="prediction-percent" id="predictionBigPercent">-</div>
+                        <div class="prediction-number" id="predictionBigNumber">-</div>
+                    </div>
+                    <div class="prediction-card small">
+                        <div class="prediction-title">Small Number Prediction</div>
+                        <div class="prediction-percent" id="predictionSmallPercent">-</div>
+                        <div class="prediction-number" id="predictionSmallNumber">-</div>
+                    </div>
+                    <div class="prediction-card odd">
+                        <div class="prediction-title">Odd Number Prediction</div>
+                        <div class="prediction-percent" id="predictionOddPercent">-</div>
+                        <div class="prediction-number" id="predictionOddNumber">-</div>
+                    </div>
+                    <div class="prediction-card even">
+                        <div class="prediction-title">Even Number Prediction</div>
+                        <div class="prediction-percent" id="predictionEvenPercent">-</div>
+                        <div class="prediction-number" id="predictionEvenNumber">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Log Panel -->
+        <div class="debug-panel">
+            <h2>📝 System Log</h2>
+            <div class="debug-log" id="debugLog">
+                <div class="log-entry">
+                    <span class="log-time">[00:00:00]</span>
+                    <span class="log-message">System initialized. Waiting for data...</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 简化的调试脚本
+        // Global variables
+        let lotteryData = [];
+        let analysisResults = {};
+        let isInitialized = false;
+        
+        // Debug logging system
         const debug = {
             log: (message, type = 'info') => {
-                console.log(`[DEBUG] ${message}`);
-                const debugLog = document.getElementById('debugLog');
-                const debugStatus = document.getElementById('debugStatus');
-                
+                const timestamp = new Date().toLocaleTimeString();
                 const logEntry = document.createElement('div');
-                logEntry.className = `status ${type}`;
-                logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
-                debugLog.appendChild(logEntry);
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-time">[${timestamp}]</span>
+                    <span class="log-message">${message}</span>
+                `;
                 
-                debugStatus.textContent = message;
+                const debugLog = document.getElementById('debugLog');
+                debugLog.appendChild(logEntry);
+                debugLog.scrollTop = debugLog.scrollHeight;
+                
+                console.log(`[DEBUG] ${type.toUpperCase()}: ${message}`);
+                
+                // Update status
+                const debugStatus = document.getElementById('debugStatus');
+                debugStatus.innerHTML = `
+                    <span class="status-icon">${getStatusIcon(type)}</span>
+                    <span>${message}</span>
+                `;
                 debugStatus.className = `status ${type}`;
             },
             
@@ -80,114 +650,386 @@
                 }
             }
         };
-
-        // 开始调试
-        document.addEventListener('DOMContentLoaded', async () => {
-            debug.log('DOM加载完成');
+        
+        function getStatusIcon(type) {
+            const icons = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            };
+            return icons[type] || 'ℹ️';
+        }
+        
+        // API Service
+        const apiService = {
+            baseUrl: 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json',
             
-            try {
-                debug.log('开始测试API服务...');
+            async fetchData() {
+                debug.log('Fetching data from API...', 'info');
                 
-                // 测试API请求
-                const apiUrl = 'https://draw.ar-lottery01.com/MotoRace/MotoRace_1M/GetHistoryIssuePage.json?ts=' + Date.now();
-                
-                debug.log('正在请求API数据...');
-                const response = await fetch(apiUrl, { 
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    debug.log(`API请求成功，获取到 ${data?.data?.length || 0} 条记录`, 'success');
+                try {
+                    const timestamp = Date.now();
+                    const url = `${this.baseUrl}?_=${timestamp}`;
                     
-                    // 处理数据
-                    if (data?.data?.length > 0) {
-                        const processedData = data.data.slice(0, 10).map((item, index) => {
-                            const number = item.number || Math.floor(Math.random() * 10);
-                            const period = item.period || `2024${(1000 + index).toString()}`;
-                            
-                            return {
-                                number,
-                                period,
-                                size: number >= 5 ? 'big' : 'small',
-                                parity: number % 2 === 0 ? 'even' : 'odd',
-                                color: number <= 1 || [3,7,9].includes(number) ? 'red' : 
-                                       number === 5 ? 'violet' : 'green',
-                                time: new Date(item.time || Date.now()).toLocaleString()
-                            };
-                        });
-                        
-                        // 更新统计
-                        const bigCount = processedData.filter(item => item.size === 'big').length;
-                        const oddCount = processedData.filter(item => item.parity === 'odd').length;
-                        
-                        document.getElementById('bigPercent').textContent = `${(bigCount/processedData.length*100).toFixed(1)}%`;
-                        document.getElementById('smallPercent').textContent = `${((processedData.length-bigCount)/processedData.length*100).toFixed(1)}%`;
-                        document.getElementById('oddPercent').textContent = `${(oddCount/processedData.length*100).toFixed(1)}%`;
-                        document.getElementById('evenPercent').textContent = `${((processedData.length-oddCount)/processedData.length*100).toFixed(1)}%`;
-                        
-                        // 更新热门号码
-                        const frequency = {};
-                        processedData.forEach(item => frequency[item.number] = (frequency[item.number] || 0) + 1);
-                        const hotNumbers = Object.entries(frequency).sort(([,a], [,b]) => b - a).slice(0, 5);
-                        
-                        document.getElementById('hotNumbersList').innerHTML = hotNumbers.map(([num, count]) => 
-                            `<div class="hot-number-item">${num} (${count}次)</div>`
-                        ).join('');
-                        
-                        // 更新历史记录
-                        document.getElementById('recentHistoryList').innerHTML = processedData.map(item => 
-                            `<div class="history-item">期号: ${item.period} | 号码: ${item.number} | ${item.size}/${item.parity}/${item.color}</div>`
-                        ).join('');
-                        
-                        debug.log('数据处理完成，页面更新成功', 'success');
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                } else {
-                    throw new Error(`API请求失败: ${response.status}`);
+                    
+                    const data = await response.json();
+                    debug.log(`API response received: ${data?.data?.length || 0} records`, 'success');
+                    
+                    return data?.data || [];
+                    
+                } catch (error) {
+                    debug.log(`API request failed: ${error.message}`, 'error');
+                    return this.generateMockData();
+                }
+            },
+            
+            generateMockData() {
+                debug.log('Generating mock data for testing...', 'warning');
+                
+                const mockData = [];
+                const now = Date.now();
+                const colors = ['red', 'green', 'violet'];
+                
+                for (let i = 0; i < 100; i++) {
+                    const number = Math.floor(Math.random() * 10);
+                    const period = `2024${String(10000 + i).slice(-5)}`;
+                    const time = new Date(now - i * 180000).toISOString();
+                    
+                    // Determine color based on Wingo rules
+                    let color;
+                    if (number === 0 || number === 1 || number === 3 || number === 7 || number === 9) {
+                        color = 'red';
+                    } else if (number === 2 || number === 4 || number === 6 || number === 8) {
+                        color = 'green';
+                    } else {
+                        color = 'violet';
+                    }
+                    
+                    mockData.push({
+                        number,
+                        period,
+                        time,
+                        color,
+                        size: number >= 5 ? 'big' : 'small',
+                        parity: number % 2 === 0 ? 'even' : 'odd'
+                    });
                 }
                 
-            } catch (error) {
-                debug.log(`API测试失败: ${error.message}`, 'error');
-                debug.log('使用模拟数据...', 'info');
+                debug.log(`Generated ${mockData.length} mock records`, 'success');
+                return mockData;
+            }
+        };
+        
+        // Data Analysis
+        const analyzer = {
+            analyze(data) {
+                debug.log('Analyzing lottery data...', 'info');
                 
-                // 生成模拟数据
-                const mockData = Array.from({length: 10}, (_, i) => {
-                    const number = Math.floor(Math.random() * 10);
-                    return {
-                        number,
-                        period: `2024${(1000 + i).toString()}`,
-                        size: number >= 5 ? 'big' : 'small',
-                        parity: number % 2 === 0 ? 'even' : 'odd',
-                        color: number <= 1 || [3,7,9].includes(number) ? 'red' : 
-                               number === 5 ? 'violet' : 'green',
-                        time: new Date(Date.now() - i * 180000).toLocaleString()
-                    };
+                const results = {
+                    frequency: {},
+                    bigCount: 0,
+                    smallCount: 0,
+                    oddCount: 0,
+                    evenCount: 0,
+                    redCount: 0,
+                    greenCount: 0,
+                    violetCount: 0,
+                    total: data.length
+                };
+                
+                // Calculate frequencies and counts
+                data.forEach(item => {
+                    const num = item.number;
+                    results.frequency[num] = (results.frequency[num] || 0) + 1;
+                    
+                    if (item.size === 'big') results.bigCount++;
+                    if (item.size === 'small') results.smallCount++;
+                    if (item.parity === 'odd') results.oddCount++;
+                    if (item.parity === 'even') results.evenCount++;
+                    
+                    if (item.color === 'red') results.redCount++;
+                    if (item.color === 'green') results.greenCount++;
+                    if (item.color === 'violet') results.violetCount++;
                 });
                 
-                // 使用模拟数据更新页面（与上面相同的逻辑）
-                const bigCount = mockData.filter(item => item.size === 'big').length;
-                const oddCount = mockData.filter(item => item.parity === 'odd').length;
+                // Calculate probabilities
+                results.bigProbability = (results.bigCount / results.total * 100).toFixed(1);
+                results.smallProbability = (results.smallCount / results.total * 100).toFixed(1);
+                results.oddProbability = (results.oddCount / results.total * 100).toFixed(1);
+                results.evenProbability = (results.evenCount / results.total * 100).toFixed(1);
                 
-                document.getElementById('bigPercent').textContent = `${(bigCount/mockData.length*100).toFixed(1)}%`;
-                document.getElementById('smallPercent').textContent = `${((mockData.length-bigCount)/mockData.length*100).toFixed(1)}%`;
-                document.getElementById('oddPercent').textContent = `${(oddCount/mockData.length*100).toFixed(1)}%`;
-                document.getElementById('evenPercent').textContent = `${((mockData.length-oddCount)/mockData.length*100).toFixed(1)}%`;
+                // Find hot numbers
+                results.hotNumbers = Object.entries(results.frequency)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10)
+                    .map(([num, count]) => ({
+                        number: parseInt(num),
+                        count,
+                        probability: (count / results.total * 100).toFixed(1)
+                    }));
                 
-                document.getElementById('hotNumbersList').innerHTML = '📝 使用模拟数据';
-                document.getElementById('recentHistoryList').innerHTML = mockData.map(item => 
-                    `<div class="history-item">期号: ${item.period} | 号码: ${item.number} | ${item.size}/${item.parity}/${item.color}</div>`
-                ).join('');
+                debug.log(`Analysis complete: ${results.hotNumbers.length} hot numbers identified`, 'success');
+                return results;
+            },
+            
+            generatePredictions(results) {
+                debug.log('Generating predictions...', 'info');
                 
-                debug.log('模拟数据加载完成', 'success');
+                const predictions = {
+                    big: {
+                        probability: results.bigProbability,
+                        numbers: [5, 6, 7, 8, 9],
+                        recommended: this.recommendNumber([5, 6, 7, 8, 9], results.frequency)
+                    },
+                    small: {
+                        probability: results.smallProbability,
+                        numbers: [0, 1, 2, 3, 4],
+                        recommended: this.recommendNumber([0, 1, 2, 3, 4], results.frequency)
+                    },
+                    odd: {
+                        probability: results.oddProbability,
+                        numbers: [1, 3, 5, 7, 9],
+                        recommended: this.recommendNumber([1, 3, 5, 7, 9], results.frequency)
+                    },
+                    even: {
+                        probability: results.evenProbability,
+                        numbers: [0, 2, 4, 6, 8],
+                        recommended: this.recommendNumber([0, 2, 4, 6, 8], results.frequency)
+                    }
+                };
+                
+                debug.log('Predictions generated successfully', 'success');
+                return predictions;
+            },
+            
+            recommendNumber(numbers, frequency) {
+                // Find least frequent number in the given set
+                let minFreq = Infinity;
+                let recommended = numbers[0];
+                
+                numbers.forEach(num => {
+                    const freq = frequency[num] || 0;
+                    if (freq < minFreq) {
+                        minFreq = freq;
+                        recommended = num;
+                    }
+                });
+                
+                return recommended;
+            }
+        };
+        
+        // UI Updater
+        const uiUpdater = {
+            updateStatistics(results) {
+                document.getElementById('bigPercent').textContent = `${results.bigProbability}%`;
+                document.getElementById('smallPercent').textContent = `${results.smallProbability}%`;
+                document.getElementById('oddPercent').textContent = `${results.oddProbability}%`;
+                document.getElementById('evenPercent').textContent = `${results.evenProbability}%`;
+            },
+            
+            updateHistory(data) {
+                const historyList = document.getElementById('recentHistoryList');
+                const recentData = data.slice(0, 20);
+                
+                if (recentData.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="history-item">
+                            <div style="text-align: center; padding: 20px; color: #6c757d;">
+                                No history data available
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                historyList.innerHTML = recentData.map(item => `
+                    <div class="history-item ${item.color}">
+                        <div class="history-number number-${item.color}">${item.number}</div>
+                        <div class="history-info">
+                            <div class="history-period">Period: ${item.period}</div>
+                            <div class="history-time">${new Date(item.time).toLocaleString()}</div>
+                        </div>
+                        <div class="history-properties">
+                            <div class="property-badge ${item.size}">${item.size}</div>
+                            <div class="property-badge ${item.parity}">${item.parity}</div>
+                            <div class="property-badge" style="background: ${item.color === 'red' ? '#dc3545' : item.color === 'green' ? '#28a745' : '#6f42c1'}; color: white;">
+                                ${item.color}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            
+            updateHotNumbers(results) {
+                const hotNumbersList = document.getElementById('hotNumbersList');
+                const hotNumbers = results.hotNumbers.slice(0, 5);
+                
+                if (hotNumbers.length === 0) {
+                    hotNumbersList.innerHTML = `
+                        <div style="text-align: center; padding: 20px; color: #6c757d;">
+                            No hot numbers data available
+                        </div>
+                    `;
+                    return;
+                }
+                
+                hotNumbersList.innerHTML = hotNumbers.map((item, index) => `
+                    <div class="hot-number-item" style="background: linear-gradient(135deg, ${this.getColorByRank(index)} 0%, ${this.getColorByRank(index, true)} 100%);">
+                        <div class="hot-number-rank">#${index + 1}</div>
+                        <div class="hot-number-value">${item.number}</div>
+                        <div class="hot-number-count">${item.count} times (${item.probability}%)</div>
+                    </div>
+                `).join('');
+            },
+            
+            getColorByRank(rank, isDark = false) {
+                const colors = [
+                    ['#ff6b6b', '#ee5a24'],
+                    ['#ffa726', '#f57c00'],
+                    ['#ffee58', '#fdd835'],
+                    ['#4cd964', '#44db5e'],
+                    ['#5ac8fa', '#34aadc']
+                ];
+                return colors[rank] ? colors[rank][isDark ? 1 : 0] : (isDark ? '#007bff' : '#4facfe');
+            },
+            
+            updatePredictions(predictions) {
+                document.getElementById('predictionBigPercent').textContent = `${predictions.big.probability}%`;
+                document.getElementById('predictionBigNumber').textContent = predictions.big.recommended;
+                
+                document.getElementById('predictionSmallPercent').textContent = `${predictions.small.probability}%`;
+                document.getElementById('predictionSmallNumber').textContent = predictions.small.recommended;
+                
+                document.getElementById('predictionOddPercent').textContent = `${predictions.odd.probability}%`;
+                document.getElementById('predictionOddNumber').textContent = predictions.odd.recommended;
+                
+                document.getElementById('predictionEvenPercent').textContent = `${predictions.even.probability}%`;
+                document.getElementById('predictionEvenNumber').textContent = predictions.even.recommended;
+            }
+        };
+        
+        // Main Functions
+        async function fetchLatestData() {
+            debug.log('Manual data fetch initiated...', 'info');
+            
+            try {
+                lotteryData = await apiService.fetchData();
+                debug.log(`Loaded ${lotteryData.length} records`, 'success');
+                
+                await runAnalysis();
+                
+            } catch (error) {
+                debug.log(`Failed to fetch data: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runAnalysis() {
+            if (lotteryData.length === 0) {
+                debug.log('No data available for analysis', 'warning');
+                return;
             }
             
-            // 隐藏加载屏幕
+            analysisResults = analyzer.analyze(lotteryData);
+            uiUpdater.updateStatistics(analysisResults);
+            uiUpdater.updateHistory(lotteryData);
+            uiUpdater.updateHotNumbers(analysisResults);
+            
+            debug.log('Analysis completed successfully', 'success');
+        }
+        
+        async function generatePredictions() {
+            if (!analysisResults || Object.keys(analysisResults).length === 0) {
+                debug.log('Please run analysis first', 'warning');
+                await runAnalysis();
+            }
+            
+            const predictions = analyzer.generatePredictions(analysisResults);
+            uiUpdater.updatePredictions(predictions);
+            
+            debug.log('Predictions generated and displayed', 'success');
+        }
+        
+        function clearData() {
+            lotteryData = [];
+            analysisResults = {};
+            
+            // Reset UI
+            document.getElementById('bigPercent').textContent = '-';
+            document.getElementById('smallPercent').textContent = '-';
+            document.getElementById('oddPercent').textContent = '-';
+            document.getElementById('evenPercent').textContent = '-';
+            
+            document.getElementById('recentHistoryList').innerHTML = `
+                <div class="history-item">
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">
+                        No history data available
+                    </div>
+                </div>
+            `;
+            
+            debug.log('All data cleared from cache', 'warning');
+        }
+        
+        // Initialize application
+        async function initializeApp() {
+            debug.log('Initializing Wingo Prediction System...', 'info');
+            
+            try {
+                // Fetch data
+                lotteryData = await apiService.fetchData();
+                debug.log(`Successfully loaded ${lotteryData.length} records`, 'success');
+                
+                // Analyze data
+                analysisResults = analyzer.analyze(lotteryData);
+                
+                // Update UI
+                uiUpdater.updateStatistics(analysisResults);
+                uiUpdater.updateHistory(lotteryData);
+                uiUpdater.updateHotNumbers(analysisResults);
+                
+                // Generate predictions
+                const predictions = analyzer.generatePredictions(analysisResults);
+                uiUpdater.updatePredictions(predictions);
+                
+                isInitialized = true;
+                debug.log('Application initialized successfully!', 'success');
+                
+            } catch (error) {
+                debug.log(`Initialization failed: ${error.message}`, 'error');
+            }
+            
+            // Hide loader
             setTimeout(() => {
                 debug.hideLoader();
-                debug.log('应用初始化完成！', 'success');
+                debug.log('Ready for predictions. Click buttons to interact.', 'success');
             }, 1000);
+        }
+        
+        // Start application
+        document.addEventListener('DOMContentLoaded', () => {
+            debug.log('DOM loaded. Starting application...', 'info');
+            setTimeout(initializeApp, 500);
         });
+        
+        // Export functions for button onclick events
+        window.fetchLatestData = fetchLatestData;
+        window.runAnalysis = runAnalysis;
+        window.generatePredictions = generatePredictions;
+        window.clearData = clearData;
     </script>
 </body>
-</html> 
+</html>
