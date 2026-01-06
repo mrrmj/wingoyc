@@ -1,0 +1,17 @@
+{
+  "name": "wingoyc-api-proxy",
+  "version": "1.0.0",
+  "description": "Local API proxy for lottery data",
+  "main": "api-server.js",
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "nodemon api-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
