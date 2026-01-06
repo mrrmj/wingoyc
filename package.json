@@ -1,17 +1,28 @@
+# Create a new package.json if missing or incorrect
+@'
 {
-  "name": "wingoyc-api-proxy",
+  "name": "wingoyc",
   "version": "1.0.0",
-  "description": "Local API proxy for lottery data",
+  "description": "WinGo Lottery Analysis Tool with API Proxy",
   "main": "api-server.js",
   "scripts": {
     "start": "node api-server.js",
-    "dev": "nodemon api-server.js"
+    "server": "node api-server.js",
+    "web": "http-server -p 8080 --cors",
+    "dev": "concurrently \"npm run server\" \"npm run web\"",
+    "api": "nodemon api-server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "axios": "^1.6.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+    "nodemon": "^3.0.1",
+    "http-server": "^14.1.1",
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["lottery", "analysis", "api", "proxy"],
+  "author": "Your Name",
+  "license": "MIT"
 }
+'@ | Out-File -FilePath "package.json" -Encoding UTF8
